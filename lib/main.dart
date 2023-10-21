@@ -1,5 +1,5 @@
-import 'package:east_stay/utils/theme/light_theme.dart';
-import 'package:east_stay/view/login_screen.dart';
+import 'package:east_stay/utils/light_theme.dart';
+import 'package:east_stay/views/login_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
