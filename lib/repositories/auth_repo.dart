@@ -7,4 +7,6 @@ class AuthRepo {
       await ApiServices.postApi(userData, AppUrls.userLogin);
   EitherResponse signupUserValidation(userData) async =>
       await ApiServices.postApi(userData, AppUrls.userSignupValidation);
+  EitherResponse signupUser(userData) async =>
+      await ApiServices.postApi(userData, AppUrls.userSignup);
 }

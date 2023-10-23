@@ -16,6 +16,7 @@ class AppTextField extends StatelessWidget {
     this.fillColor,
     this.validator,
     this.isObscured = false,
+    this.keyboard=TextInputType.name
   });
   final String? label;
   final String? hint;
@@ -28,16 +29,18 @@ class AppTextField extends StatelessWidget {
   final Color? fillColor;
   final FormFieldValidator? validator;
   final bool isObscured;
-
+  final TextInputType keyboard;
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       child: TextFormField(
         controller: controller,
         readOnly: isReadOnly,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
         onTap: onTap,
         validator: validator,
         obscureText: isObscured,
+        keyboardType: keyboard,
         decoration: InputDecoration(
           isDense: true,
           labelText: label,

@@ -1,4 +1,3 @@
-
 import 'package:east_stay/resources/constants/colors.dart';
 import 'package:east_stay/resources/constants/text_style.dart';
 import 'package:flutter/material.dart';
@@ -47,18 +46,14 @@ class Reviews extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 5),
-                    const Column(
+                    Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Amanda',
+                        Text('Amanda', style: AppText.mediumdark),
+                        const Text('Dec 09 2024',
                             style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600)),
-                        Text('Dec 09 2024',
-                            style: TextStyle(
-                                fontSize: 12,
-                                color: AppColor.textSecondary)),
+                                fontSize: 12, color: AppColor.textSecondary)),
                       ],
                     ),
                     const Spacer(),
@@ -92,7 +87,7 @@ class Reviews extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 5),
-             Text(
+            Text(
               'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
               style: AppText.smallDark,
               maxLines: 2,

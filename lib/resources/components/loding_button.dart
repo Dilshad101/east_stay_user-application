@@ -8,12 +8,12 @@ class LoadingButton extends StatelessWidget {
     super.key,
     this.margin,
     this.onTap,
-    this.label,
+   required this.label,
     this.isLoading = false,
   });
   final double? margin;
   final VoidCallback? onTap;
-  final String? label;
+  final String label;
   final bool isLoading;
   @override
   Widget build(BuildContext context) {
@@ -33,7 +33,7 @@ class LoadingButton extends StatelessWidget {
                 scale: .7,
                 child: const CircularProgressIndicator(color: Colors.white),
               )
-            : Text('Login', style: AppText.mediumLight),
+            : Text(label, style: AppText.mediumLight),
       ),
     );
   }

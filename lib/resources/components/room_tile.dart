@@ -1,79 +1,76 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:east_stay/models/room_model.dart';
 import 'package:east_stay/resources/constants/colors.dart';
 import 'package:east_stay/resources/constants/text_style.dart';
 import 'package:east_stay/resources/components/room_location.dart';
 import 'package:east_stay/resources/components/room_price.dart';
+import 'package:east_stay/resources/loaders/shimmer.dart';
+import 'package:east_stay/views/room_details_screen.dart';
 import 'package:flutter/material.dart';
 
 class RoomTile extends StatelessWidget {
   const RoomTile({
-    super.key,  this.isFavorite=false,
+    super.key,
+    this.isFavorite = false,
+    required this.room,
   });
   final bool isFavorite;
+  final Hotel room;
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(6),
-        color: Colors.white,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
+    return GestureDetector(
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(6),
+          color: Colors.white,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
               flex: 2,
-              child: Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                    borderRadius:
-                        const BorderRadius.vertical(top: Radius.circular(6)),
-                    image: const DecorationImage(
-                      image: NetworkImage(
-                          'https://images.unsplash.com/photo-1618773928121-c32242e63f39?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80'),
-                      fit: BoxFit.cover,
-                    ),
-                    color: Colors.deepPurple[100]),
-                child: Align(
-                  alignment: Alignment.topRight,
-                  child: CircleAvatar(
-                    radius: 18,
-                    backgroundColor: Colors.black.withOpacity(.5),
-                    child: IconButton(
-                      onPressed: () {},
-                      icon:  Icon(
-                       isFavorite? Icons.favorite:Icons.favorite_border,
-                        size: 20,
-                        color:isFavorite? AppColor.primaryColor:Colors.white,
-                      ),
-                    ),
-                  ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: CachedNetworkImage(
+                  imageUrl: room.img[0],
+                  placeholder: (context, url) => const ShimmerLoader(
+                      height: double.maxFinite, width: double.maxFinite),
+                  errorWidget: (context, url, error) => const Icon(Icons.error),
+                  fit: BoxFit.cover,
                 ),
-              )),
-          Container(
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Hotel Paragon',
-                  style: AppText.mediumdark,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const Location(
-                  state: 'Kerala',
-                  city: 'Kannur',
-                  color: AppColor.textPrimary,
-                  size: 12,
-                ),
-                const Price(
-                  price: '1000',
-                  color: AppColor.textPrimary,
-                  size: 12,
-                )
-              ],
+              ),
             ),
-          ),
-        ],
+            Container(
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    room.vendor.propertyName,
+                    style: AppText.mediumdark,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Location(
+                    state: room.state,
+                    city: room.city,
+                    color: AppColor.textPrimary,
+                    size: 12,
+                  ),
+                  Price(
+                    price: room.price,
+                    color: AppColor.textPrimary,
+                    size: 12,
+                  )
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
+      onTap: () {
+        Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => ScreenRoomDetails(room: room)));
+      },
     );
   }
 }

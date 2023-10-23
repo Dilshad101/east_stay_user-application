@@ -1,6 +1,9 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:card_swiper/card_swiper.dart';
+import 'package:east_stay/models/room_model.dart';
 import 'package:east_stay/resources/constants/colors.dart';
 import 'package:east_stay/resources/constants/text_style.dart';
+import 'package:east_stay/resources/loaders/shimmer.dart';
 import 'package:east_stay/views/booking_screen.dart';
 import 'package:east_stay/resources/components/amenities.dart';
 import 'package:east_stay/resources/components/coupons.dart';
@@ -10,7 +13,8 @@ import 'package:east_stay/resources/components/subtitle.dart';
 import 'package:flutter/material.dart';
 
 class ScreenRoomDetails extends StatelessWidget {
-  const ScreenRoomDetails({super.key});
+  const ScreenRoomDetails({super.key, required this.room});
+  final Hotel room;
   @override
   Widget build(BuildContext context) {
     final dheight = MediaQuery.sizeOf(context).height;
@@ -23,75 +27,42 @@ class ScreenRoomDetails extends StatelessWidget {
             padding: const EdgeInsets.all(0),
             children: [
               // image Slider
-              SizedBox(
-                height: dheight * .38,
-                child: Swiper(
-                  itemCount: 4,
-                  itemBuilder: (context, index) => Container(
-                    color: index % 2 == 0 ? Colors.blue : Colors.red,
-                  ),
-                  pagination: const SwiperPagination(
-                    builder: DotSwiperPaginationBuilder(
-                        activeColor: AppColor.primaryColor,
-                        color: Color(0xFFE0E0E0),
-                        activeSize: 11,
-                        space: 4),
-                  ),
-                ),
-              ),
+              hotelImages(dheight),
               const SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: Row(
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'Hotel Paragon',
-                        style: TextStyle(
+                        room.vendor.propertyName,
+                        style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
                           color: AppColor.secondaryColor,
                         ),
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 8),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(6),
-                        color: AppColor.gold,
-                      ),
-                      child: const Text(
-                        'Luxury',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 1,
-                        ),
-                      ),
-                    )
+                    catagory(room.category)
                   ],
                 ),
               ),
-              const SizedBox(height: 5),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.0),
+              const SizedBox(height: 10),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: Text(
-                  '''Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.''',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColor.textPrimary,
-                  ),
+                  room.description,
+                  style: AppText.smallLight,
                   textAlign: TextAlign.justify,
                 ),
               ),
               const SizedBox(height: 20),
               const SubTitle('Amenities'),
               const SizedBox(height: 10),
-              const Amenities(),
+              Amenities(amenities: room.amenities),
               const SizedBox(height: 20),
-              const SubTitle('Coupons'),
-              const SizedBox(height: 10),
+              // const SubTitle('Coupons'),
+              // const SizedBox(height: 10),
               const Coupons(),
               const SizedBox(height: 20),
               const SubTitle('Location'),
@@ -173,8 +144,8 @@ class ScreenRoomDetails extends StatelessWidget {
             Expanded(
               child: Container(
                 alignment: Alignment.center,
-                child: const Price(
-                  price: '1000',
+                child:  Price(
+                  price:room.price,
                   size: 18,
                   textSize: 14,
                   color: AppColor.secondaryColor,
@@ -183,7 +154,7 @@ class ScreenRoomDetails extends StatelessWidget {
             ),
             Expanded(
               child: GestureDetector(
-                onTap: () =>const ScreenBooking() ,
+                onTap: () => const ScreenBooking(),
                 child: Container(
                   margin: const EdgeInsets.fromLTRB(15, 8, 10, 8),
                   decoration: BoxDecoration(
@@ -199,6 +170,49 @@ class ScreenRoomDetails extends StatelessWidget {
               ),
             )
           ],
+        ),
+      ),
+    );
+  }
+
+  Container catagory(String catagory) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(6),
+        color: AppColor.gold,
+      ),
+      child:  Text(
+        catagory,
+        style:const TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 1,
+        ),
+      ),
+    );
+  }
+
+  SizedBox hotelImages(double dheight) {
+    return SizedBox(
+      height: dheight * .38,
+      child: Swiper(
+        itemCount: room.img.length,
+        itemBuilder: (context, index) => CachedNetworkImage(
+          imageUrl: room.img[index],
+          placeholder: (context, url) => const ShimmerLoader(
+            height: double.maxFinite,
+            width: double.maxFinite,
+          ),
+          errorWidget: (context, url, error) => const Icon(Icons.error),
+          fit: BoxFit.cover,
+        ),
+        pagination: const SwiperPagination(
+          builder: DotSwiperPaginationBuilder(
+              activeColor: AppColor.primaryColor,
+              color: Color(0xFFE0E0E0),
+              activeSize: 11,
+              space: 4),
         ),
       ),
     );

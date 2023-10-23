@@ -1,4 +1,4 @@
-import 'package:east_stay/resources/components/room_tile.dart';
+// import 'package:east_stay/resources/components/room_tile.dart';
 import 'package:flutter/material.dart';
 
 class ScreenFavorite extends StatelessWidget {
@@ -17,7 +17,11 @@ class ScreenFavorite extends StatelessWidget {
           mainAxisSpacing: 10,
           crossAxisSpacing: 10,
         ),
-        itemBuilder: (context, index) => const RoomTile(isFavorite: true),
+        itemBuilder: (context, index) => Container(
+          color: Colors.blue,
+          height: 80,
+          width: 80,
+        ) /* RoomTile(isFavorite: true) */,
         itemCount: 5,
       ),
     );

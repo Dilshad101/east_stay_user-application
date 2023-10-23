@@ -5,7 +5,8 @@ class Location extends StatelessWidget {
     super.key,
     required this.state,
     required this.city,
-    this.color, this.size,
+    this.color,
+    this.size,
   });
   final String state;
   final String city;
@@ -15,32 +16,21 @@ class Location extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-         Icon(
+        Icon(
           Icons.location_on_outlined,
-          color:color?? Colors.white,
+          color: color ?? Colors.white,
           size: 16,
         ),
         const SizedBox(width: 4),
-        Text(
-          city,
-          style:  TextStyle(
-            fontSize:size?? 13,
-            color:color?? Colors.white,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(width: 5),
-         CircleAvatar(
-          radius: 2,
-          backgroundColor:color?? Colors.white,
-        ),
-        const SizedBox(width: 5),
-        Text(
-          state,
-          style:  TextStyle(
-            fontSize:size?? 13,
-            color:color?? Colors.white,
-            fontWeight: FontWeight.w500,
+        Expanded(
+          child: Text(
+            '$city  $state',
+            style: TextStyle(
+              fontSize: size ?? 13,
+              color: color ?? Colors.white,
+              fontWeight: FontWeight.w500,
+            ),
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],
