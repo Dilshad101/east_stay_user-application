@@ -53,6 +53,7 @@ class RoomCatagory extends StatelessWidget {
   }
 
   GridView roomView(List<Hotel> roomList) {
+    
     return GridView.builder(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
         physics: const NeverScrollableScrollPhysics(),

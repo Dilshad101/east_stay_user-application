@@ -2,9 +2,11 @@ import 'package:east_stay/resources/constants/colors.dart';
 import 'package:flutter/material.dart';
 
 class AppText {
-  static TextStyle get small => const TextStyle(
-        fontSize: 12,
-        color: AppColor.textPrimary,
+  static TextStyle get xSmall =>  TextStyle(
+        fontSize: 11.5,
+        fontWeight: FontWeight.w500,
+        fontFamily: 'Poppins',
+        color: Colors.grey[500],
       );
   static TextStyle get smallDark => const TextStyle(
         fontSize: 12,

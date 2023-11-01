@@ -14,6 +14,12 @@ class Validations {
     return hasEmail.hasMatch(value) ? null : 'Invalid email';
   }
 
+  static String? isPassword(String? value) {
+    if (value == null || value.isEmpty) return 'Password is Required';
+    if (value.length < 6) return 'Password requires at least 8 characters';
+    return null;
+  }
+
   static String? isPasswordMatch(String? value1, String? value2) {
     if (value1 == null || value1.isEmpty || value2 == null || value2.isEmpty) {
       return 'confirm your password';

@@ -1,5 +1,8 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:east_stay/models/room_model.dart';
 import 'package:east_stay/resources/constants/colors.dart';
 import 'package:east_stay/resources/constants/text_style.dart';
+import 'package:east_stay/resources/loaders/shimmer.dart';
 import 'package:flutter/material.dart';
 
 import 'room_price.dart';
@@ -7,8 +10,9 @@ import 'room_price.dart';
 class SearchTile extends StatelessWidget {
   const SearchTile({
     super.key,
+    required this.hotel,
   });
-
+  final Hotel hotel;
   @override
   Widget build(BuildContext context) {
     final dwidth = MediaQuery.sizeOf(context).width;
@@ -26,7 +30,16 @@ class SearchTile extends StatelessWidget {
             margin: const EdgeInsets.fromLTRB(10, 0, 10, 10),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(6),
-              color: Colors.amber,
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: CachedNetworkImage(
+                imageUrl: hotel.img[0],
+                placeholder: (context, url) => const ShimmerLoader(
+                    height: double.maxFinite, width: double.maxFinite),
+                errorWidget: (context, url, error) => const Icon(Icons.error),
+                fit: BoxFit.cover,
+              ),
             ),
           ),
           Expanded(
@@ -34,7 +47,7 @@ class SearchTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Hotel Paragon',
+                  hotel.vendor.propertyName,
                   style: AppText.largeDark,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -45,9 +58,10 @@ class SearchTile extends StatelessWidget {
                   ],
                 ),
                 // SizedBox(height: 4),
-                Text('Calicut  Kerala', style: AppText.smallLight),
+                Text('${hotel.city}  ${hotel.state}',
+                    style: AppText.smallLight),
                 const SizedBox(height: 4),
-                const Price(price: '300', color: AppColor.textSecondary),
+                Price(price: hotel.price, color: AppColor.textSecondary),
                 const Expanded(child: SizedBox()),
                 Align(
                   alignment: Alignment.bottomRight,
@@ -62,8 +76,8 @@ class SearchTile extends StatelessWidget {
                       ),
                       color: Colors.blue[800],
                     ),
-                    child: Text('Classic',
-                        style: AppText.small.copyWith(color: Colors.white)),
+                    child: Text(hotel.category,
+                        style: AppText.smallLight.copyWith(color: Colors.white)),
                   ),
                 )
               ],

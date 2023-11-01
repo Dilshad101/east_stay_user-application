@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:east_stay/blocs/user_bloc/user_bloc.dart';
+import 'package:east_stay/data/shared_preferences/shared_pref.dart';
 import 'package:east_stay/repositories/auth_repo.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -7,7 +9,8 @@ part 'signup_event.dart';
 part 'signup_state.dart';
 
 class SignupBloc extends Bloc<SignupEvent, SignupState> {
-  SignupBloc() : super(SignupInitial()) {
+  final UserBloc userBloc;
+  SignupBloc(this.userBloc) : super(SignupInitial()) {
     on<SignupUserEvent>(signupUserEvent);
   }
 
@@ -34,6 +37,8 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
           (response) {
             if (response['status'] == 'success') {
               emit(SignupSuccessState('success'));
+              SharedPref.instance.setUser(response['token']);
+              userBloc.add(FetchUserDataEvent(token: response['token']));
             } else {
               emit(SignupFailuerState(message: response['message']));
             }

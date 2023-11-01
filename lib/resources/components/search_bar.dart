@@ -1,16 +1,28 @@
+// ignore_for_file: prefer_const_constructors
+
+import 'package:east_stay/blocs/search_bloc/search_bloc.dart';
 import 'package:east_stay/resources/constants/colors.dart';
 import 'package:east_stay/views/search_screen.dart';
 import 'package:east_stay/resources/components/app_textfield.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AppSearchBar extends StatelessWidget {
-  const AppSearchBar({
+  AppSearchBar({
     super.key,
     this.ishome = true,
     this.onFilterPressed,
+    this.onChanged,
+    this.filterNotifier,
+    this.priceNotifier,
   });
+
   final bool ishome;
   final VoidCallback? onFilterPressed;
+  final void Function(String)? onChanged;
+  final ValueNotifier<Map<String, bool>>? filterNotifier;
+  final ValueNotifier<double?>? priceNotifier;
+  final TextEditingController searchController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -33,16 +45,29 @@ class AppSearchBar extends StatelessWidget {
                         isReadOnly: true,
                         fillColor: Colors.white,
                         hint: 'Search hotel , appartment...',
-                        controller: TextEditingController(),
                         suffixIcon: Icons.search,
                         onTap: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                                builder: (context) => ScreenSearch())),
+                          MaterialPageRoute(
+                              builder: (context) => ScreenSearch()),
+                        ),
                       )
                     : AppTextField(
-                        borderRadius: 6,
-                        hint: 'Search hotel , appartment...',
-                        controller: TextEditingController(),
+                        controller: searchController,
+                        hint: 'Search hotel, appartment...',
+                        onChanged: (val) {
+                          List<String> filters = [];
+                          filterNotifier!.value.forEach((key, value) {
+                            if (value) {
+                              filters.add(key);
+                            }
+                          });
+                          context.read<SearchBloc>().add(SearchHotelEvent(
+                                query: val,
+                                filterList: filters,
+                                priceRange: priceNotifier?.value,
+                              ));
+                        },
+                        fillColor: Colors.white,
                         suffixIcon: Icons.search,
                       ),
               ),

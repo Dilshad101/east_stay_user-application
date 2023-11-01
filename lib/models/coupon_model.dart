@@ -1,5 +1,6 @@
 class Coupon {
   final String id;
+  final String hotelName;
   final String vendorId;
   final String couponCode;
   final int discount;
@@ -8,7 +9,9 @@ class Coupon {
   final List<String> users;
   final bool isExpire;
 
-  Coupon({
+  Coupon(
+   {
+      required this.hotelName, 
     required this.id,
     required this.vendorId,
     required this.couponCode,
@@ -19,9 +22,10 @@ class Coupon {
     required this.isExpire,
   });
 
-  factory Coupon.fromJson(Map<String, dynamic> json) {
+  factory Coupon.fromJson(Map<String, dynamic> json, String name) {
     return Coupon(
       id: json['_id'],
+      hotelName: name,
       vendorId: json['vendorId'],
       couponCode: json['couponCode'],
       discount: json['discount'],

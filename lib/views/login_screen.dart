@@ -1,6 +1,8 @@
-
-import 'package:east_stay/blocs/sign_in_bloc/login_bloc.dart';
-import 'package:east_stay/views/root_screen.dart';
+import 'package:east_stay/blocs/booked_room_bloc/booked_room_bloc.dart';
+import 'package:east_stay/blocs/home_bloc/home_bloc.dart';
+import 'package:east_stay/blocs/login_bloc/login_bloc.dart';
+import 'package:east_stay/utils/snack_bar.dart';
+import 'package:east_stay/views/parent_screen.dart';
 import 'package:east_stay/views/signup_screen.dart';
 import 'package:east_stay/resources/components/app_textfield.dart';
 import 'package:east_stay/resources/components/auth_header_container.dart';
@@ -13,8 +15,7 @@ class ScreenLogin extends StatelessWidget {
   ScreenLogin({super.key});
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-  final loginKey = GlobalKey<FormState>();
-  final loginController = LoginBloc();
+  final loginFormKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,7 +31,7 @@ class ScreenLogin extends StatelessWidget {
               const SizedBox(height: 40),
               Expanded(
                 child: Form(
-                  key: loginKey,
+                  key: loginFormKey,
                   child: Padding(
                     padding: const EdgeInsets.all(20),
                     child: Column(
@@ -47,6 +48,7 @@ class ScreenLogin extends StatelessWidget {
                         AppTextField(
                           label: 'Password',
                           icon: Icons.lock_outline_rounded,
+                          isObscured: true,
                           controller: passwordController,
                           validator: (value) => value.toString().isEmpty
                               ? 'Field is Empty'
@@ -68,26 +70,24 @@ class ScreenLogin extends StatelessWidget {
                 ),
               ),
               BlocConsumer<LoginBloc, LoginState>(
-                bloc: loginController,
                 listener: (context, state) {
                   if (state is LoginSuccessState) {
-                    Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (context) => ScreenRoot()));
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(SnackBar(content: Text(state.message)));
+                    context.read<HomeBloc>().add(HomeGetAllHotelsEvent());
+                    context.read<BookedRoomBloc>().add(FetchBookedRoomsEvent());
+                    Navigator.of(context).pushReplacement(MaterialPageRoute(
+                        builder: (context) => ScreenParant()));
+                    MessageViewer.showSnackBar(context, state.message);
                   } else if (state is LoginFailureState) {
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(SnackBar(content: Text(state.message)));
+                    MessageViewer.showSnackBar(context, state.message, true);
                   } else if (state is ErrorState) {
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(SnackBar(content: Text(state.message)));
+                    MessageViewer.showSnackBar(context, state.message, true);
                   }
                 },
                 builder: (context, state) {
-                  bool isLoading = state is LoginLoadingState ? true : false;
+                  bool isLoading = state is LoginLoadingState;
                   return LoadingButton(
                     label: 'Login',
-                    onTap: loginUser,
+                    onTap: () => loginUser(context),
                     margin: 20,
                     isLoading: isLoading,
                   );
@@ -101,12 +101,12 @@ class ScreenLogin extends StatelessWidget {
     );
   }
 
-  void loginUser() {
-    if (loginKey.currentState!.validate()) {
-      loginController.add(LoginUserEvent(
-        email: emailController.text,
-        password: passwordController.text,
-      ));
+  void loginUser(BuildContext context) {
+    if (loginFormKey.currentState!.validate()) {
+      context.read<LoginBloc>().add(LoginUserEvent(
+            email: emailController.text,
+            password: passwordController.text,
+          ));
     }
   }
 }

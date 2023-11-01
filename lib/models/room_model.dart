@@ -51,7 +51,7 @@ class Hotel {
     required this.isBanned,
   });
 
-  factory Hotel.fromJson(Map<String, dynamic> json, ) {
+  factory Hotel.fromJson(Map<String, dynamic> json) {
     return Hotel(
       id: json['_id'],
       vendor: Vendor.fromJson(json['vendorId']),

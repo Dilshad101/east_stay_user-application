@@ -1,3 +1,4 @@
+import 'package:east_stay/blocs/home_bloc/home_bloc.dart';
 import 'package:east_stay/blocs/sign_up_bloc/signup_bloc.dart';
 import 'package:east_stay/resources/components/loding_button.dart';
 import 'package:east_stay/utils/snack_bar.dart';
@@ -5,7 +6,7 @@ import 'package:east_stay/utils/validations.dart';
 import 'package:east_stay/resources/components/app_textfield.dart';
 import 'package:east_stay/resources/components/auth_header_container.dart';
 import 'package:east_stay/resources/components/pair_text.dart';
-import 'package:east_stay/views/root_screen.dart';
+import 'package:east_stay/views/parent_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -67,6 +68,7 @@ class ScreenSignup extends StatelessWidget {
                           label: 'Password',
                           icon: Icons.lock,
                           controller: passwordController,
+                          isObscured: true,
                           validator: (value) =>
                               Validations.isEmpty(value, 'password'),
                         ),
@@ -74,6 +76,7 @@ class ScreenSignup extends StatelessWidget {
                         AppTextField(
                           label: 'Confirm Password',
                           icon: Icons.lock,
+                          isObscured: true,
                           controller: confirmPasswordController,
                           validator: (value) => Validations.isPasswordMatch(
                             value,
@@ -86,7 +89,7 @@ class ScreenSignup extends StatelessWidget {
                           secondText: 'Login',
                           onTap: () => Navigator.of(context).pushReplacement(
                             MaterialPageRoute(
-                              builder: (context) => ScreenRoot(),
+                              builder: (context) => ScreenParant(),
                             ),
                           ),
                         ),
@@ -110,10 +113,13 @@ class ScreenSignup extends StatelessWidget {
                 } else if (state is SignupErrorState) {
                   MessageViewer.showSnackBar(context, state.message, true);
                 } else if (state is SignupSuccessState) {
+                  context.read<HomeBloc>().add(HomeGetAllHotelsEvent());
                   Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (context) => ScreenRoot()));
+                      MaterialPageRoute(builder: (context) => ScreenParant()));
                   MessageViewer.showSnackBar(
-                      context, 'Account Created Successfully');
+                    context,
+                    'Account Created Successfully',
+                  );
                 }
               }),
               const SizedBox(height: 20),

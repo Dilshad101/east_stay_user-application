@@ -12,10 +12,13 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<HomeGetAllHotelsEvent>(homeGetAllHotelsEvent);
   }
 
+  List<Hotel> hotelList = [];
+
   FutureOr<void> homeGetAllHotelsEvent(
       HomeGetAllHotelsEvent event, Emitter<HomeState> emit) async {
     emit(HomeLoadingState());
     final either = await RoomRepo().getAllRooms();
+    // final eitherReview = await RoomRepo().getRoomReview('  ');
     either.fold(
       (error) {},
       (response) {
@@ -35,6 +38,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           final luxuryRoomList = roomList
               .where((room) => room.category.toLowerCase() == 'luxury')
               .toList();
+          hotelList = roomList;
           emit(
             HomeLoadedSuccessState(
               classicRoomList: classicRoomList,
@@ -45,7 +49,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
             ),
           );
         } else {
-          print('failed to get roomList');
           emit(HomeLoadedFailedState());
         }
       },

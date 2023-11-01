@@ -6,7 +6,7 @@ class AppTextField extends StatelessWidget {
   const AppTextField({
     super.key,
     this.label,
-    required this.controller,
+    this.controller,
     this.icon,
     this.suffixIcon,
     this.hint,
@@ -16,11 +16,13 @@ class AppTextField extends StatelessWidget {
     this.fillColor,
     this.validator,
     this.isObscured = false,
-    this.keyboard=TextInputType.name
+    this.keyboard = TextInputType.name,
+    this.onChanged,
+    this.autoValidate = true,
   });
   final String? label;
   final String? hint;
-  final TextEditingController controller;
+  final TextEditingController? controller;
   final IconData? icon;
   final IconData? suffixIcon;
   final double? borderRadius;
@@ -30,17 +32,22 @@ class AppTextField extends StatelessWidget {
   final FormFieldValidator? validator;
   final bool isObscured;
   final TextInputType keyboard;
+  final void Function(String)? onChanged;
+  final bool autoValidate;
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       child: TextFormField(
         controller: controller,
         readOnly: isReadOnly,
-        autovalidateMode: AutovalidateMode.onUserInteraction,
+        autovalidateMode:
+            autoValidate ? AutovalidateMode.onUserInteraction : null,
         onTap: onTap,
         validator: validator,
         obscureText: isObscured,
         keyboardType: keyboard,
+        onChanged: onChanged,
+        style: AppText.mediumdark.copyWith(fontWeight: FontWeight.w500),
         decoration: InputDecoration(
           isDense: true,
           labelText: label,

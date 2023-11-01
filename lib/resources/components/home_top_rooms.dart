@@ -22,8 +22,8 @@ class HomeTopRooms extends StatelessWidget {
         } else if (state is HomeLoadedSuccessState) {
           return roomView(dwidth, state.topRatedRoomList);
         }
-        return SizedBox(
-          child: const Text('something went wrong'),
+        return const SizedBox(
+          child: Text('something went wrong'),
         );
       },
     );
@@ -37,10 +37,13 @@ class HomeTopRooms extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 20),
         shrinkWrap: true,
-        itemCount: 2,
+        itemCount: roomList.length <= 4 ? roomList.length : 4,
         itemBuilder: (context, index) => GestureDetector(
           onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) =>  ScreenRoomDetails(room: roomList[index],)),
+            MaterialPageRoute(
+                builder: (context) => ScreenRoomDetails(
+                      room: roomList[index],
+                    )),
           ),
           child: Stack(
             children: [
@@ -48,9 +51,8 @@ class HomeTopRooms extends StatelessWidget {
                 width: dwidth * .8,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(6),
-                  image: const DecorationImage(
-                    image: NetworkImage(
-                        'https://images.unsplash.com/photo-1618773928121-c32242e63f39?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80'),
+                  image: DecorationImage(
+                    image: NetworkImage(roomList[index].img[0]),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -86,13 +88,13 @@ class HomeTopRooms extends StatelessWidget {
                       ),
                     ),
                     const Expanded(child: SizedBox()),
-                    const Row(
+                    Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Expanded(
                           child: Text(
-                            'Hotel Paragon',
-                            style: TextStyle(
+                            roomList[index].vendor.propertyName,
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 20,
                               fontWeight: FontWeight.w600,
@@ -100,19 +102,17 @@ class HomeTopRooms extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        SizedBox(width: 5),
-                        Ratings()
+                        const SizedBox(width: 5),
+                        const Ratings()
                       ],
                     ),
                     const SizedBox(height: 4),
-                    const Location(
-                      state: 'Kerala',
-                      city: 'Calicut',
+                    Location(
+                      state: roomList[index].state,
+                      city: roomList[index].city,
                     ),
                     const SizedBox(height: 4),
-                    const Price(
-                      price: '1000',
-                    ),
+                    Price(price: roomList[index].price),
                   ],
                 ),
               )
