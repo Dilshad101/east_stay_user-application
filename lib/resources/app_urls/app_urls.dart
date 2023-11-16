@@ -13,4 +13,10 @@ class AppUrls {
   static const String cancelRoom = '$_baseUrl/api/cancelbooking';
   static const String getRoomReview = '$_baseUrl/api/getReiviews/roomId';
   static const String applyCoupon = '$_baseUrl/api/coupnapply';
+  static const String getTopRatedRooms = '$_baseUrl/api/top-rated-rooms';
+  static const String addToWishlist = '$_baseUrl/api/wishlist/add';
+  static const String getWishListedRooms = '$_baseUrl/api/wishlist/';
+  static const String getAvailableDates = '$_baseUrl/api/getDates/';
+  static const String bookRoom = '$_baseUrl/api/createbooking';
+  static const String removeFromWishlist = '$_baseUrl/api//delete-wishlist/';
 }

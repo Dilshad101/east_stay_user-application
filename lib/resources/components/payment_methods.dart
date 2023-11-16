@@ -18,7 +18,6 @@ class PaymentMethod extends StatelessWidget {
   Widget build(BuildContext context) {
     return StatefulBuilder(builder: (context, setstate) {
       return ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
         physics: const NeverScrollableScrollPhysics(),
         shrinkWrap: true,
         itemCount: 4,

@@ -19,35 +19,34 @@ class ApiServices {
     final body = jsonEncode(rawData);
     try {
       final response = await http.post(uri, body: body, headers: _headers);
-
       fetchedData = _getResponse(response);
+      return Right(fetchedData);
     } on SocketException {
       return Left(InternetException());
     } on http.ClientException {
       return Left(RequestTimeOUtException());
     } catch (e) {
-      return Left(e as AppException);
+      return Left(BadRequestException());
     }
-    return Right(fetchedData);
   }
 
-  static EitherResponse<Map> getApi(String url, [String? usertoken]) async {
+  static EitherResponse getApi(String url, [String? usertoken]) async {
     final uri = Uri.parse(url);
     if (usertoken != null) {
       _headers['usertoken'] = usertoken;
     }
-    Map<String, dynamic> fetchedData = {};
+    dynamic fetchedData;
     try {
       final response = await http.get(uri, headers: _headers);
       fetchedData = _getResponse(response);
+      return Right(fetchedData);
     } on SocketException {
       return Left(InternetException());
     } on http.ClientException {
       return Left(RequestTimeOUtException());
     } catch (e) {
-      return Left(e as AppException);
+      return Left(BadRequestException());
     }
-    return Right(fetchedData);
   }
 
   static EitherResponse<Map> patchApi(
@@ -64,12 +63,30 @@ class ApiServices {
     } on http.ClientException {
       return Left(RequestTimeOUtException());
     } catch (e) {
-      return Left(e as AppException);
+      return Left(BadRequestException());
     }
     return Right(fetchedData);
   }
 
-  static Map<String, dynamic> _getResponse(http.Response response) {
+  static EitherResponse deleteApi(String url, String usertoken) async {
+    final uri = Uri.parse(url);
+    _headers['usertoken'] = usertoken;
+    dynamic fetchedData;
+
+    try {
+      final response = await http.delete(uri, headers: _headers);
+      fetchedData = _getResponse(response);
+      return Right(fetchedData);
+    } on SocketException {
+      return Left(InternetException());
+    } on http.ClientException {
+      return Left(RequestTimeOUtException());
+    } catch (e) {
+      return Left(BadRequestException());
+    }
+  }
+
+  static _getResponse(http.Response response) {
     switch (response.statusCode) {
       case 200:
         return (jsonDecode(response.body));

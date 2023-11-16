@@ -23,7 +23,11 @@ final class BookedRoomFetchedErrorState extends BookedRoomState {
 
 final class RoomRatedSuccessState extends BookedRoomActionState {}
 
-final class RoomRatedFailedState extends BookedRoomActionState {}
+final class RoomRatedFailedState extends BookedRoomActionState {
+  final String message;
+
+  RoomRatedFailedState({required this.message});
+}
 
 final class RoomCancelSuccessState extends BookedRoomActionState {}
 

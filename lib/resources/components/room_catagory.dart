@@ -1,6 +1,7 @@
 import 'package:east_stay/blocs/home_bloc/home_bloc.dart';
 import 'package:east_stay/models/room_model.dart';
 import 'package:east_stay/resources/components/room_tile.dart';
+import 'package:east_stay/resources/constants/text_style.dart';
 import 'package:east_stay/resources/loaders/shimmer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -18,7 +19,13 @@ class RoomCatagory extends StatelessWidget {
       if (state is HomeLoadingState) {
         return shimmerLoader(dwidth);
       } else if (state is HomeLoadedSuccessState) {
-        return roomView(state.topRatedRoomList);
+        final roomCatagory = {
+          'Classic': state.classicRoomList,
+          'Elite': state.eliteRoomList,
+          'Deluxe': state.deluxeRoomList,
+          'Luxury': state.luxuryRoomList
+        };
+        return roomView(roomCatagory[catagory]!);
       }
       return const SizedBox();
     });
@@ -52,20 +59,23 @@ class RoomCatagory extends StatelessWidget {
     );
   }
 
-  GridView roomView(List<Hotel> roomList) {
-    
-    return GridView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-        physics: const NeverScrollableScrollPhysics(),
-        shrinkWrap: true,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 10,
-            crossAxisSpacing: 10,
-            childAspectRatio: 1 / 1.2),
-        itemCount: roomList.length,
-        itemBuilder: (context, index) => RoomTile(
-              room: roomList[index],
-            ));
+  Widget roomView(List<Hotel> roomList) {
+    return roomList.isEmpty
+        ?  Center(
+            child: Text('No room available in this catagory',style: AppText.mediumdark,),
+          )
+        : GridView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+                childAspectRatio: 1 / 1.2),
+            itemCount: roomList.length,
+            itemBuilder: (context, index) => RoomTile(
+                  room: roomList[index],
+                ));
   }
 }

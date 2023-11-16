@@ -12,6 +12,7 @@ final class HomeLoadedSuccessState extends HomeState {
   final List<Hotel> deluxeRoomList;
   final List<Hotel> luxuryRoomList;
   final List<Hotel> topRatedRoomList;
+  final List<Hotel> totalRoomList;
 
   HomeLoadedSuccessState({
     required this.topRatedRoomList,
@@ -19,9 +20,14 @@ final class HomeLoadedSuccessState extends HomeState {
     required this.deluxeRoomList,
     required this.eliteRoomList,
     required this.luxuryRoomList,
+    required this.totalRoomList,
   });
 }
 
-final class HomeLoadedFailedState extends HomeState {}
+final class HomeLoadedFailedState extends HomeState {
+  final String message;
+
+  HomeLoadedFailedState({required this.message});
+}
 
 final class HomeErrorState extends HomeState {}

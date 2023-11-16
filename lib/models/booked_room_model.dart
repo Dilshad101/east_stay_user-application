@@ -51,22 +51,38 @@ class BookedRoom {
       isCancel: json['isCancel'],
     );
   }
+// {status: success, booked: {roomId: 641368e3bee1d1efbc62e3a7,
+//userId: 63fe0c940157b2ccdf966c54,
+//vendorId: 63fe12010157b2ccdf966ca0,
+//adult: 700,
+//rooms: 1,
+//location: calicut,
+//checkIn: 2023-11-06T00:00:00.000,
+//checkOut: 2023-11-08T00:00:00.000,
+//RoomPrice: 700, type:
+//classic, total: 700,
+//address: sjadfnasjkakjsf,
+//phone: 9879879879,
+//place: Kollam,
+//days: 1,
+//isCancel: false,
+// _id: 65490cb6619853e55779efc5,}}
 
   Map<String, dynamic> toJson() {
     return {
       '_id': id,
-      // 'roomId': room.toJson(),
-      // 'vendor': vendor,
-      // 'checkIn': checkIn.toIso8601String(),
-      // 'checkOut': checkOut.toIso8601String(),
-      // 'RoomPrice': roomPrice,
-      // 'type': type,
-      // 'total': total,
-      // 'address': address,
-      // 'phone': phone,
-      // 'place': place,
-      // 'days': days,
-      // 'isCancel': isCancel,
+      'roomId': room.toJson(),
+      'vendor': vendor,
+      'checkIn': checkIn.toIso8601String(),
+      'checkOut': checkOut.toIso8601String(),
+      'RoomPrice': roomPrice,
+      'type': type,
+      'total': total,
+      'address': address,
+      'phone': phone,
+      'place': place,
+      'days': days,
+      'isCancel': isCancel,
     };
   }
 }

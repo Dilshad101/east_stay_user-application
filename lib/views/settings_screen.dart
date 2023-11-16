@@ -1,11 +1,16 @@
 import 'package:east_stay/blocs/user_bloc/user_bloc.dart';
+import 'package:east_stay/data/shared_preferences/shared_pref.dart';
 import 'package:east_stay/resources/constants/colors.dart';
 import 'package:east_stay/resources/constants/text_style.dart';
+import 'package:east_stay/utils/alert_dialoge.dart';
+import 'package:east_stay/views/app_info_screen.dart';
 import 'package:east_stay/views/edit_profile_screen.dart';
+import 'package:east_stay/views/help_screen.dart';
 import 'package:east_stay/views/login_screen.dart';
+import 'package:east_stay/views/privacy_policy_screen.dart';
+import 'package:east_stay/views/terms_and_condition_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:icons_plus/icons_plus.dart';
 
 class ScreenSettings extends StatelessWidget {
   const ScreenSettings({super.key});
@@ -18,20 +23,49 @@ class ScreenSettings extends StatelessWidget {
           children: [
             userProfile(),
             const SizedBox(height: 20),
-            settingsTile(IonIcons.settings_sharp, 'settings'),
-            settingsTile(Icons.privacy_tip_outlined, 'App Info'),
+            settingsTile(
+              Icons.privacy_tip_outlined,
+              'App Info',
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => const ScreenAppInfo())),
+            ),
             Divider(color: Colors.grey[200], thickness: 2),
-            settingsTile(Icons.note_outlined, 'Terms & Conditions'),
-            settingsTile(Icons.import_contacts_outlined, 'Privacy & policies'),
-            settingsTile(Icons.help_center_outlined, 'Help'),
+            settingsTile(
+              Icons.note_outlined,
+              'Terms & Conditions',
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => const ScreenTermsAndCondition())),
+            ),
+            settingsTile(
+              Icons.import_contacts_outlined,
+              'Privacy & policies',
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => const ScreenPrivacyPolicy())),
+            ),
+            settingsTile(
+              Icons.help_center_outlined,
+              'Help',
+              onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const ScreenHelp())),
+            ),
             Divider(color: Colors.grey[200], thickness: 2),
             settingsTile(
               Icons.logout_sharp,
               'Sign out',
+              hideSuffix: true,
               onTap: () {
-                Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(builder: (context) => ScreenLogin()),
-                    (route) => false);
+                alertPopup(
+                  context: context,
+                  title: 'Sign out',
+                  content: 'Are you sure you want to sign out',
+                  onCancel: () => Navigator.pop(context),
+                  onOkey: () {
+                    SharedPref.instance.logOutUser();
+                    Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (context) => ScreenLogin()),
+                        (route) => false);
+                  },
+                );
               },
             ),
           ],
@@ -40,20 +74,21 @@ class ScreenSettings extends StatelessWidget {
     );
   }
 
-  ListTile settingsTile(IconData leading, String title, {VoidCallback? onTap}) {
+  ListTile settingsTile(IconData leading, String title,
+      {VoidCallback? onTap, bool hideSuffix = false}) {
     return ListTile(
       leading: Icon(leading, size: 23),
       title: Text(
         title,
         style: AppText.largeDark,
       ),
-      trailing: onTap == null
-          ? const Icon(
+      trailing: hideSuffix
+          ? null
+          : const Icon(
               Icons.keyboard_arrow_right_outlined,
               size: 24,
               color: AppColor.secondaryColor,
-            )
-          : null,
+            ),
       onTap: onTap,
     );
   }

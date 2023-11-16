@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:east_stay/blocs/home_bloc/home_bloc.dart';
 import 'package:east_stay/blocs/sign_up_bloc/signup_bloc.dart';
 import 'package:east_stay/resources/components/loding_button.dart';
@@ -9,6 +11,7 @@ import 'package:east_stay/resources/components/pair_text.dart';
 import 'package:east_stay/views/parent_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class ScreenSignup extends StatelessWidget {
   ScreenSignup({super.key});
@@ -105,7 +108,7 @@ class ScreenSignup extends StatelessWidget {
                   label: 'Sign up',
                   margin: 20,
                   isLoading: isLoading,
-                  onTap: () => singupUser(context),
+                  onTap: () => _requestPermissions(context),
                 );
               }, listener: (context, state) {
                 if (state is SignupFailuerState) {
@@ -114,6 +117,7 @@ class ScreenSignup extends StatelessWidget {
                   MessageViewer.showSnackBar(context, state.message, true);
                 } else if (state is SignupSuccessState) {
                   context.read<HomeBloc>().add(HomeGetAllHotelsEvent());
+                  // TOO: check if any unhandled empty messages are left (by not addin any events)
                   Navigator.of(context).pushReplacement(
                       MaterialPageRoute(builder: (context) => ScreenParant()));
                   MessageViewer.showSnackBar(
@@ -141,6 +145,21 @@ class ScreenSignup extends StatelessWidget {
               confirmPass: confirmPasswordController.text,
             ),
           );
+    }
+  }
+
+  Future<void> _requestPermissions(BuildContext context) async {
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.storage,
+    ].request();
+
+    if (statuses[Permission.storage] == PermissionStatus.granted) {
+      singupUser(context);
+    } else {
+      MessageViewer.showSnackBar(
+          context,
+          'To Continue, please enable the Storage permission in the app settings',
+          true);
     }
   }
 }

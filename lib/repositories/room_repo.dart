@@ -5,8 +5,10 @@ import 'package:east_stay/utils/type_def.dart';
 
 class RoomRepo {
   final token = SharedPref.instance.getUser();
+
   EitherResponse getAllRooms() async =>
       await ApiServices.getApi(AppUrls.getAllHotels);
+
   EitherResponse getBookedHotels() async =>
       await ApiServices.getApi(AppUrls.getBookedHotels, token);
 
@@ -15,12 +17,25 @@ class RoomRepo {
         AppUrls.getHotelCoupons.replaceFirst('vendorId', vendorId),
       );
 
-  EitherResponse rateARoom(var review) async {
-    return await ApiServices.postApi(review, AppUrls.rateARoom);
-  }
+  EitherResponse rateARoom(var review) async =>
+      await ApiServices.postApi(review, AppUrls.rateARoom);
 
-  EitherResponse getRoomReview(String roomId) async {
-    return await ApiServices.getApi(
-        AppUrls.getRoomReview.replaceFirst('roomId', roomId), token);
-  }
+  EitherResponse getRoomReview(String roomId) async => await ApiServices.getApi(
+      AppUrls.getRoomReview.replaceFirst('roomId', roomId), token);
+
+  EitherResponse getTopRatedRooms() async =>
+      await ApiServices.getApi(AppUrls.getTopRatedRooms);
+
+  EitherResponse addToWishlist(var rawData) async =>
+      await ApiServices.postApi(rawData, AppUrls.addToWishlist, token);
+
+  EitherResponse getWishListedRooms(String userId) async =>
+      await ApiServices.getApi(AppUrls.getWishListedRooms + userId, token);
+
+  EitherResponse removeFromWishlist(String roomId) async =>
+      await ApiServices.deleteApi(AppUrls.removeFromWishlist + roomId, token!);
+
+  EitherResponse getAvailableDates(String roomId) async =>
+      await ApiServices.getApi(AppUrls.getAvailableDates + roomId, token);
+
 }

@@ -1,8 +1,11 @@
 import 'package:east_stay/blocs/booked_room_bloc/booked_room_bloc.dart';
 import 'package:east_stay/blocs/bookin_bloc/booking_bloc.dart';
 import 'package:east_stay/blocs/coupon_bloc/coupon_bloc.dart';
+import 'package:east_stay/blocs/favorite_bloc/favorite_bloc.dart';
 import 'package:east_stay/blocs/home_bloc/home_bloc.dart';
 import 'package:east_stay/blocs/login_bloc/login_bloc.dart';
+import 'package:east_stay/blocs/payment_bloc/payment_bloc.dart';
+import 'package:east_stay/blocs/review_bloc/review_bloc.dart';
 import 'package:east_stay/blocs/search_bloc/search_bloc.dart';
 import 'package:east_stay/blocs/sign_up_bloc/signup_bloc.dart';
 import 'package:east_stay/blocs/user_bloc/user_bloc.dart';
@@ -26,13 +29,21 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => UserBloc()),
-        BlocProvider(create: (_) => HomeBloc()),
         BlocProvider(create: (_) => CouponBloc()),
+        BlocProvider(create: (_) => ReviewBloc()),
         BlocProvider(create: (_) => BookedRoomBloc()),
-        BlocProvider(create: (context) => RoomBookingBloc()),
+        BlocProvider(create: (_) => FavoriteBloc()),
+        BlocProvider(create: (_) => PaymentBloc()),
         BlocProvider(create: (context) => LoginBloc(context.read<UserBloc>())),
         BlocProvider(create: (context) => SignupBloc(context.read<UserBloc>())),
-        BlocProvider(create: (context) => SearchBloc(context.read<HomeBloc>())),
+        BlocProvider(
+            create: (context) => HomeBloc(context.read<FavoriteBloc>())),
+        BlocProvider(
+          create: (context) => RoomBookingBloc(context.read<BookedRoomBloc>()),
+        ),
+        BlocProvider(
+          create: (context) => SearchBloc(context.read<HomeBloc>()),
+        ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

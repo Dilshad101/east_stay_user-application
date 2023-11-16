@@ -21,6 +21,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       if (response['status'] == 'failed') {
         emit(UserFetchedFailureState());
       } else {
+        SharedPref.instance.setUserId(response['userDetails']['_id']);
         _user = User.fromJson(response['userDetails'], event.token);
         emit(UserFetchedSuccessState(user: _user));
       }

@@ -1,7 +1,9 @@
+import 'package:east_stay/blocs/bookin_bloc/booking_bloc.dart';
 import 'package:east_stay/resources/constants/colors.dart';
 import 'package:east_stay/resources/constants/text_style.dart';
 import 'package:east_stay/utils/snack_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class BookingCount extends StatelessWidget {
   const BookingCount({
@@ -38,6 +40,11 @@ class BookingCount extends StatelessWidget {
             onTap: () {
               if (numberNotifier.value <= 1) return;
               numberNotifier.value--;
+              isGuest
+                  ? context.read<RoomBookingBloc>().add(
+                      UpdateGuestEvent(count: numberNotifier.value.toString()))
+                  : context.read<RoomBookingBloc>().add(
+                      UpdateRoomEvent(count: numberNotifier.value.toString()));
             },
           ),
           const SizedBox(width: 10),
@@ -55,14 +62,16 @@ class BookingCount extends StatelessWidget {
                   : 'only $limit Rooms Available';
 
               if (numberNotifier.value >= limit) {
-                MessageViewer.showSnackBar(
-                  context,
-                  message,
-                  true,
-                );
+                MessageViewer.showSnackBar(context, message, true);
                 return;
               }
               numberNotifier.value++;
+              isGuest
+                  ? context.read<RoomBookingBloc>().add(
+                      UpdateGuestEvent(count: numberNotifier.value.toString()))
+                  : context.read<RoomBookingBloc>().add(
+                      UpdateRoomEvent(count: numberNotifier.value.toString()));
+                  context.read<RoomBookingBloc>();
             },
           ),
         ],

@@ -1,9 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:card_swiper/card_swiper.dart';
+import 'package:east_stay/blocs/favorite_bloc/favorite_bloc.dart';
+import 'package:east_stay/blocs/review_bloc/review_bloc.dart';
 import 'package:east_stay/models/room_model.dart';
 import 'package:east_stay/resources/constants/colors.dart';
 import 'package:east_stay/resources/constants/text_style.dart';
 import 'package:east_stay/resources/loaders/shimmer.dart';
+import 'package:east_stay/utils/map_helper.dart';
+import 'package:east_stay/utils/snack_bar.dart';
 import 'package:east_stay/views/booking_screen.dart';
 import 'package:east_stay/resources/components/amenities.dart';
 import 'package:east_stay/resources/components/coupon_view.dart';
@@ -11,6 +15,9 @@ import 'package:east_stay/resources/components/reviews.dart';
 import 'package:east_stay/resources/components/room_price.dart';
 import 'package:east_stay/resources/components/subtitle.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 class ScreenRoomDetails extends StatelessWidget {
   const ScreenRoomDetails({super.key, required this.room});
@@ -18,6 +25,7 @@ class ScreenRoomDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dheight = MediaQuery.sizeOf(context).height;
+    context.read<ReviewBloc>().add(FetchReviewEvent(room.id));
     return Scaffold(
       body: Stack(
         children: [
@@ -25,7 +33,7 @@ class ScreenRoomDetails extends StatelessWidget {
             shrinkWrap: true,
             padding: const EdgeInsets.all(0),
             children: [
-              hotelImages(dheight),
+              hotelImages(dheight, context),
               const SizedBox(height: 20),
               hotelName(),
               const SizedBox(height: 10),
@@ -40,9 +48,7 @@ class ScreenRoomDetails extends StatelessWidget {
               const SizedBox(height: 10),
               map(dheight),
               const SizedBox(height: 20),
-              reviewTitle(),
-              const SizedBox(height: 10),
-              const Reviews(),
+              Reviews(room: room),
               const SizedBox(height: 20)
             ],
           ),
@@ -127,43 +133,37 @@ class ScreenRoomDetails extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 20),
       height: dheight * .25,
       width: double.maxFinite,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(4),
-        color: AppColor.grey,
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(4)),
+      child: AbsorbPointer(
+        absorbing: true,
+        child: FlutterMap(
+          options: MapOptions(
+            initialCenter: getLatLng(room.latitude.toString(), room.longitude),
+            initialZoom: 14,
+          ),
+          children: [
+            TileLayer(
+              urlTemplate: MapHelper.urlTemplate,
+              additionalOptions: const {
+                "accessToken": MapHelper.accessToken,
+                "id": MapHelper.mapId
+              },
+            ),
+            MarkerLayer(alignment: Alignment.center, markers: [
+              Marker(
+                height: 100,
+                width: 100,
+                point: getLatLng(room.latitude.toString(), room.longitude),
+                child: const Icon(
+                  Icons.location_on,
+                  color: Colors.red,
+                  size: 35,
+                ),
+              )
+            ])
+          ],
+        ),
       ),
-    );
-  }
-
-  Row reviewTitle() {
-    return const Row(
-      children: [
-        SubTitle('Reviews'),
-        SizedBox(width: 5),
-        Icon(
-          Icons.star,
-          color: AppColor.gold,
-          size: 20,
-        ),
-        SizedBox(width: 5),
-        Text(
-          '(4.2)',
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-            color: AppColor.textPrimary,
-          ),
-        ),
-        Expanded(child: SizedBox()),
-        Text(
-          'View more',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: Colors.blue,
-          ),
-        ),
-        SizedBox(width: 20),
-      ],
     );
   }
 
@@ -213,28 +213,80 @@ class ScreenRoomDetails extends StatelessWidget {
     );
   }
 
-  SizedBox hotelImages(double dheight) {
+  Widget hotelImages(double dheight, BuildContext context) {
     return SizedBox(
       height: dheight * .38,
-      child: Swiper(
-        itemCount: room.img.length,
-        itemBuilder: (context, index) => CachedNetworkImage(
-          imageUrl: room.img[index],
-          placeholder: (context, url) => const ShimmerLoader(
-            height: double.maxFinite,
-            width: double.maxFinite,
+      child: Stack(
+        children: [
+          Swiper(
+            itemCount: room.img.length,
+            itemBuilder: (context, index) => CachedNetworkImage(
+              imageUrl: room.img[index],
+              placeholder: (context, url) => const ShimmerLoader(
+                height: double.maxFinite,
+                width: double.maxFinite,
+              ),
+              errorWidget: (context, url, error) => const Icon(Icons.error),
+              fit: BoxFit.cover,
+            ),
+            pagination: const SwiperPagination(
+              builder: DotSwiperPaginationBuilder(
+                  activeColor: AppColor.primaryColor,
+                  color: Color(0xFFE0E0E0),
+                  activeSize: 11,
+                  space: 4),
+            ),
           ),
-          errorWidget: (context, url, error) => const Icon(Icons.error),
-          fit: BoxFit.cover,
-        ),
-        pagination: const SwiperPagination(
-          builder: DotSwiperPaginationBuilder(
-              activeColor: AppColor.primaryColor,
-              color: Color(0xFFE0E0E0),
-              activeSize: 11,
-              space: 4),
-        ),
+          favButton(context)
+        ],
       ),
     );
+  }
+
+  Widget favButton(BuildContext context) {
+    return Positioned(
+        top: MediaQuery.of(context).padding.top + 10,
+        right: 20,
+        child: BlocConsumer<FavoriteBloc, FavoriteState>(
+          buildWhen: (previous, current) => current is! FavoriteActionState,
+          listenWhen: (previous, current) => current is FavoriteActionState,
+          listener: (context, state) {
+            if (state is WishListFailedState) {
+              MessageViewer.showSnackBar(context, state.message);
+            }
+          },
+          builder: (context, state) {
+            if (state is WishListFetchedState) {
+              final isFavorite = state.wishListedRooms
+                  .where((favRoom) => favRoom.id == room.id)
+                  .firstOrNull;
+
+              return CircleAvatar(
+                radius: 22,
+                backgroundColor: Colors.white,
+                child: IconButton(
+                  onPressed: () {
+                    context.read<FavoriteBloc>().add(
+                          isFavorite == null
+                              ? AddToWishListEvent(room: room)
+                              : RemoveFromWishListEvent(room: room),
+                        );
+                  },
+                  icon: Icon(
+                    isFavorite != null ? Icons.favorite : Icons.favorite_border,
+                    color: AppColor.primaryColor,
+                  ),
+                ),
+              );
+            }
+            return const SizedBox();
+          },
+        ));
+  }
+
+  LatLng getLatLng(String lat, String lng) {
+    final latitude = double.parse(lat);
+    final longitude = double.parse(lng);
+    return LatLng(latitude, longitude);
   }
 }

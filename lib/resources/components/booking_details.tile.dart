@@ -9,6 +9,8 @@ import 'package:east_stay/resources/components/button.dart';
 import 'package:east_stay/resources/components/star_rater.dart';
 import 'package:east_stay/resources/loaders/shimmer.dart';
 import 'package:east_stay/utils/snack_bar.dart';
+import 'package:east_stay/views/booked_room_details_screen.dart';
+import 'package:east_stay/views/room_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -16,28 +18,35 @@ import 'package:intl/intl.dart';
 class BookingDetailsTile extends StatelessWidget {
   BookingDetailsTile({
     super.key,
-    this.isCancel = false,
+    this.showCancel = false,
     required this.bookedRoom,
   });
-  final bool isCancel;
+  final bool showCancel;
   final BookedRoom bookedRoom;
   final reviewController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     final dwidth = MediaQuery.sizeOf(context).width;
-    return Container(
-      height: 155,
-      padding: const EdgeInsets.only(top: 10),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(6),
-        color: Colors.white,
-      ),
-      child: Column(
-        children: [
-          body(dwidth),
-          const SizedBox(height: 10),
-          isCancel ? cancelroom(context) : rateUs(context, dwidth)
-        ],
+    return GestureDetector(
+      onTap: () => Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => ScreenBookedRoomDetails(
+                bookedRoom: bookedRoom,
+                showCancel: showCancel,
+              ))),
+      child: Container(
+        height: 155,
+        padding: const EdgeInsets.only(top: 10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(6),
+          color: Colors.white,
+        ),
+        child: Column(
+          children: [
+            body(dwidth),
+            const SizedBox(height: 10),
+            showCancel ? cancelroom(context) : rateUs(context, dwidth)
+          ],
+        ),
       ),
     );
   }
@@ -119,20 +128,25 @@ class BookingDetailsTile extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: Container(
-              margin: EdgeInsets.only(top: 5),
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                borderRadius:
-                    BorderRadius.only(bottomRight: Radius.circular(6)),
-                color: AppColor.primaryColor,
-              ),
-              child: Text(
-                'Book Again',
-                style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white),
+            child: GestureDetector(
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) =>
+                      ScreenRoomDetails(room: bookedRoom.room))),
+              child: Container(
+                margin: EdgeInsets.only(top: 5),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  borderRadius:
+                      BorderRadius.only(bottomRight: Radius.circular(6)),
+                  color: AppColor.primaryColor,
+                ),
+                child: Text(
+                  'Book Again',
+                  style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white),
+                ),
               ),
             ),
           )
@@ -157,8 +171,7 @@ class BookingDetailsTile extends StatelessWidget {
                 if (state is RoomCancelSuccessState) {
                   MessageViewer.showSnackBar(context, 'Room has been canceled');
                 } else if (state is RoomCancelFailedState) {
-                  MessageViewer.showSnackBar(
-                      context, 'Failed to cancel the room');
+                  MessageViewer.showSnackBar(context, state.message);
                 }
               },
               child: GestureDetector(
@@ -229,7 +242,8 @@ class BookingDetailsTile extends StatelessWidget {
                   MessageViewer.showSnackBar(
                       context, 'Review added successfully');
                 } else if (state is RoomRatedFailedState) {
-                  MessageViewer.showSnackBar(context, "Failed to add Review");
+                  Navigator.pop(context);
+                  MessageViewer.showSnackBar(context, state.message, true);
                 }
               },
               child: PrimaryButton(

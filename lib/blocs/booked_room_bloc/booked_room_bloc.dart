@@ -19,6 +19,8 @@ class BookedRoomBloc extends Bloc<BookedRoomEvent, BookedRoomState> {
   _fetchBookedRoom(
       FetchBookedRoomsEvent event, Emitter<BookedRoomState> emit) async {
     emit(BookedRoomLoadingState());
+    bookedRooms.clear();
+    upcomingBookings.clear();
     final either = await RoomRepo().getBookedHotels();
     either.fold(
       (error) {
@@ -27,15 +29,21 @@ class BookedRoomBloc extends Bloc<BookedRoomEvent, BookedRoomState> {
       (response) {
         if (response['status'] == 'failed') return;
         final List rawList = response['bookedRooms'];
-
-        bookedRooms = rawList.map((e) => BookedRoom.fromJson(e)).toList();
-        upcomingBookings = bookedRooms
-            .where((e) => e.checkIn.isAfter(DateTime.now()))
+        final roomList = rawList.map((e) => BookedRoom.fromJson(e)).toList();
+        bookedRooms = roomList
+            .where((e) => e.checkOut.isBefore(DateTime.now()) && !e.isCancel)
             .toList();
+        upcomingBookings = roomList
+            .where((e) =>
+                (e.checkIn.isAfter(DateTime.now()) ||
+                    e.checkOut.isAfter(DateTime.now())) &&
+                !e.isCancel)
+            .toList();
+
         emit(
           BookedRoomFetchedState(
             bookedrooms: bookedRooms,
-            upcomingBookings: bookedRooms,
+            upcomingBookings: upcomingBookings,
           ),
         );
       },
@@ -54,12 +62,12 @@ class BookedRoomBloc extends Bloc<BookedRoomEvent, BookedRoomState> {
     final either = await RoomRepo().rateARoom(rating);
 
     either.fold((error) {
-      emit(RoomRatedFailedState());
+      emit(RoomRatedFailedState(message: error.message));
     }, (response) {
       if (response['status'] == 'success') {
         emit(RoomRatedSuccessState());
       } else {
-        emit(RoomRatedFailedState());
+        emit(RoomRatedFailedState(message: response['message']));
       }
     });
 
@@ -79,7 +87,10 @@ class BookedRoomBloc extends Bloc<BookedRoomEvent, BookedRoomState> {
         upcomingBookings
             .removeWhere((bookedRoom) => bookedRoom.id == event.bookId);
       } else {
-        emit(RoomCancelFailedState(message: 'Failed to cancel the room'));
+        emit(
+          RoomCancelFailedState(
+              message: response['message'] ?? 'falied to add review'),
+        );
       }
     });
     emit(BookedRoomFetchedState(

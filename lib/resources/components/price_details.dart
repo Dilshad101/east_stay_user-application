@@ -18,37 +18,65 @@ class PriceDetails extends StatelessWidget {
     final dwidth = MediaQuery.sizeOf(context).width;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SubTitle('Price Details', fontSize: 16, padding: 0),
-          const SizedBox(height: 20),
-          couponField(context, dwidth),
-          const SizedBox(height: 15),
-          BlocBuilder<RoomBookingBloc, BookingState>(
-            builder: (context, state) {
-              if (state is BookingFieldFilledState) {
-                return priceDetails(
+      child: BlocBuilder<RoomBookingBloc, BookingState>(
+        buildWhen: (previous, current) => current is BookingActionState,
+        builder: (context, state) {
+          if (state is BookingFieldFilledState) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SubTitle('Price Details', fontSize: 16, padding: 0),
+                const SizedBox(height: 20),
+                couponField(context, dwidth),
+                const SizedBox(height: 15),
+                priceDetails(
                   leading: 'x ${state.bookingData['dayCount'] ?? 1} Nights',
                   trailing:
                       '₹ ${(state.bookingData['dayCount'] ?? 1) * int.parse(hotel.price)}',
                   price: hotel.price,
-                );
-              }
-              return priceDetails(
-                  leading: 'x 1 Night',
-                  trailing: hotel.price,
-                  price: hotel.price);
-            },
-          ),
-          const SizedBox(height: 15),
-          priceDetails(leading: 'Guests', trailing: '1'),
-          const SizedBox(height: 15),
-          priceDetails(leading: 'Rooms', trailing: '1'),
-          const SizedBox(height: 15),
-          priceDetails(leading: 'Discount', trailing: '₹ 0'),
-          const SizedBox(height: 15),
-        ],
+                ),
+                const SizedBox(height: 15),
+                priceDetails(
+                    leading: 'Guests',
+                    trailing: '${state.bookingData['guestCount'] ?? 1}'),
+                const SizedBox(height: 15),
+                priceDetails(
+                    leading: 'Rooms',
+                    trailing: '${state.bookingData['roomCount'] ?? 1}'),
+                const SizedBox(height: 15),
+                priceDetails(
+                    leading: 'Discount',
+                    trailing: '₹ ${state.bookingData['discount'] ?? 0}'),
+                const SizedBox(height: 15),
+                priceDetails(
+                    leading: 'Total',
+                    trailing: '₹ ${getTotal(state.bookingData)}')
+              ],
+            );
+          }
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SubTitle('Price Details', fontSize: 16, padding: 0),
+              const SizedBox(height: 20),
+              couponField(context, dwidth),
+              const SizedBox(height: 15),
+              priceDetails(
+                leading: 'x 1 Night',
+                trailing: hotel.price,
+                price: hotel.price,
+              ),
+              const SizedBox(height: 15),
+              priceDetails(leading: 'Guests', trailing: '1'),
+              const SizedBox(height: 15),
+              priceDetails(leading: 'Rooms', trailing: '1'),
+              const SizedBox(height: 15),
+              priceDetails(leading: 'Discount', trailing: '₹ 0'),
+              const SizedBox(height: 15),
+              priceDetails(leading: 'Total', trailing: '₹ ${hotel.price}')
+            ],
+          );
+        },
       ),
     );
   }
@@ -68,7 +96,13 @@ class PriceDetails extends StatelessWidget {
           listener: (context, state) {
             if (state is CouponAppliedSuccessfullState) {
               MessageViewer.showSnackBar(context, 'coupon applied');
+              context
+                  .read<RoomBookingBloc>()
+                  .add(ApplyDiscountEvent(discount: state.discount));
             } else if (state is CouponAppliedFailedState) {
+              context
+                  .read<RoomBookingBloc>()
+                  .add(ApplyDiscountEvent(discount: '0'));
               MessageViewer.showSnackBar(context, state.message, true);
             }
           },
@@ -132,5 +166,15 @@ class PriceDetails extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  String getTotal(Map<String, dynamic> bookingData) {
+    final num days = bookingData['dayCount'] ?? 1;
+    final guests = int.parse(bookingData['guestCount'] ?? '1');
+    final rooms = int.parse(bookingData['roomCount'] ?? '1');
+    final discount = int.parse(bookingData['discount'] ?? '0');
+    final price = int.parse(hotel.price);
+    final total = (days * guests * rooms * price) - discount;
+    return total.toString();
   }
 }

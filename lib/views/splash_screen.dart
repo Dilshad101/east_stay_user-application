@@ -36,6 +36,7 @@ class ScreenSplash extends StatelessWidget {
       context.read<BookedRoomBloc>().add(FetchBookedRoomsEvent());
     } else if (state is UserFetchedSuccessState) {
       context.read<HomeBloc>().add(HomeGetAllHotelsEvent());
+
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => ScreenParant()),
       );

@@ -49,7 +49,7 @@ class ScreenBookingHistory extends StatelessWidget {
                   shrinkWrap: true,
                   itemBuilder: (context, index) => BookingDetailsTile(
                     bookedRoom: state.upcomingBookings[index],
-                    isCancel: true,
+                    showCancel: true,
                   ),
                   separatorBuilder: (context, index) =>
                       const SizedBox(height: 20),
@@ -78,15 +78,20 @@ class ScreenBookingHistory extends StatelessWidget {
       buildWhen: (previous, current) => current is! BookedRoomActionState,
       builder: (context, state) {
         if (state is BookedRoomFetchedState) {
-          return ListView.separated(
-            padding: const EdgeInsets.all(20),
-            shrinkWrap: true,
-            itemBuilder: (context, index) => BookingDetailsTile(
-              bookedRoom: state.bookedrooms[index],
-            ),
-            separatorBuilder: (context, index) => const SizedBox(height: 20),
-            itemCount: state.bookedrooms.length,
-          );
+          return state.bookedrooms.isEmpty
+              ? Center(
+                  child: Text('You have no checked out Rooms',
+                      style: AppText.mediumLight.copyWith(color: Colors.grey)))
+              : ListView.separated(
+                  padding: const EdgeInsets.all(20),
+                  shrinkWrap: true,
+                  itemBuilder: (context, index) => BookingDetailsTile(
+                    bookedRoom: state.bookedrooms[index],
+                  ),
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 20),
+                  itemCount: state.bookedrooms.length,
+                );
         } else if (state is BookedRoomFetchedErrorState) {
           return Center(
               child: Text(

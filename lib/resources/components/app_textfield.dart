@@ -3,23 +3,23 @@ import 'package:east_stay/resources/constants/text_style.dart';
 import 'package:flutter/material.dart';
 
 class AppTextField extends StatelessWidget {
-  const AppTextField({
-    super.key,
-    this.label,
-    this.controller,
-    this.icon,
-    this.suffixIcon,
-    this.hint,
-    this.borderRadius,
-    this.isReadOnly = false,
-    this.onTap,
-    this.fillColor,
-    this.validator,
-    this.isObscured = false,
-    this.keyboard = TextInputType.name,
-    this.onChanged,
-    this.autoValidate = true,
-  });
+  const AppTextField(
+      {super.key,
+      this.label,
+      this.controller,
+      this.icon,
+      this.suffixIcon,
+      this.hint,
+      this.borderRadius,
+      this.isReadOnly = false,
+      this.onTap,
+      this.fillColor,
+      this.validator,
+      this.isObscured = false,
+      this.keyboard = TextInputType.name,
+      this.onChanged,
+      this.autoValidate = true,
+      this.minLine});
   final String? label;
   final String? hint;
   final TextEditingController? controller;
@@ -34,6 +34,7 @@ class AppTextField extends StatelessWidget {
   final TextInputType keyboard;
   final void Function(String)? onChanged;
   final bool autoValidate;
+  final int? minLine;
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -47,6 +48,8 @@ class AppTextField extends StatelessWidget {
         obscureText: isObscured,
         keyboardType: keyboard,
         onChanged: onChanged,
+        minLines: minLine,
+        maxLines: minLine ?? 0 + 1,
         style: AppText.mediumdark.copyWith(fontWeight: FontWeight.w500),
         decoration: InputDecoration(
           isDense: true,

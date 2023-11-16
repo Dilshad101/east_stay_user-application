@@ -16,13 +16,12 @@ class Coupons extends StatelessWidget {
   final Vendor vendor;
   @override
   Widget build(BuildContext context) {
+    final couponBloc = context.read<CouponBloc>();
     final dwidth = MediaQuery.sizeOf(context).width;
-
-    context.read<CouponBloc>().add(ClearCouponsEvent());
-    context.read<CouponBloc>().add(FetchCouponsEvent(vendor: vendor));
+    couponBloc.add(FetchCouponsEvent(vendor: vendor));
 
     return BlocBuilder<CouponBloc, CouponState>(
-      bloc: context.read<CouponBloc>(),
+      bloc: couponBloc,
       buildWhen: (previous, current) => current is! CouponActionState,
       builder: (context, state) {
         if (state is CouponLoadedSuccessfullState) {
@@ -113,7 +112,7 @@ class Coupons extends StatelessWidget {
                           ),
                         );
 
-                        // code to remove 
+                        // code to remove
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                             backgroundColor: Colors.grey[200],
                             content: Text(

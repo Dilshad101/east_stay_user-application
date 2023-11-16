@@ -14,7 +14,11 @@ final class CouponLoadedSuccessfullState extends CouponState {
 
 final class CouponEmptyState extends CouponState {}
 
-final class CouponAppliedSuccessfullState extends CouponActionState {}
+final class CouponAppliedSuccessfullState extends CouponActionState {
+  final String discount;
+
+  CouponAppliedSuccessfullState({required this.discount});
+}
 
 final class CouponAppliedFailedState extends CouponActionState {
   final String message;

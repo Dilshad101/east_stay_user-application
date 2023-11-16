@@ -1,16 +1,21 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:east_stay/blocs/bookin_bloc/booking_bloc.dart';
+import 'package:east_stay/blocs/payment_bloc/payment_bloc.dart';
 import 'package:east_stay/models/room_model.dart';
+import 'package:east_stay/resources/components/app_textfield.dart';
+import 'package:east_stay/resources/components/loding_button.dart';
 import 'package:east_stay/resources/constants/colors.dart';
 import 'package:east_stay/resources/constants/text_style.dart';
 import 'package:east_stay/resources/components/booking_count_field.dart';
-import 'package:east_stay/resources/components/button.dart';
 import 'package:east_stay/resources/components/custom_text_field.dart';
-import 'package:east_stay/resources/components/payment_methods.dart';
 import 'package:east_stay/resources/components/price_details.dart';
 import 'package:east_stay/resources/components/subtitle.dart';
 import 'package:east_stay/resources/loaders/shimmer.dart';
+import 'package:east_stay/utils/snack_bar.dart';
+import 'package:east_stay/utils/validations.dart';
+import 'package:east_stay/views/parent_screen.dart';
+import 'package:east_stay/views/payment_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -18,14 +23,24 @@ import 'package:intl/intl.dart';
 class ScreenBooking extends StatelessWidget {
   ScreenBooking({super.key, required this.hotel});
   final Hotel hotel;
+
   final dateController = TextEditingController();
+
   final guestNotifier = ValueNotifier(1);
+
   final roomNotifier = ValueNotifier(1);
+
+  final mobileController = TextEditingController();
+
+  final addressController = TextEditingController();
+
+  final bookingFormKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
+    final dwidth = MediaQuery.sizeOf(context).width;
     final bookingbloc = context.read<RoomBookingBloc>();
     final dheight = MediaQuery.sizeOf(context).height;
-    final dwidth = MediaQuery.sizeOf(context).width;
     return Scaffold(
       appBar: appBar(context),
       body: ListView(
@@ -34,19 +49,102 @@ class ScreenBooking extends StatelessWidget {
           hotelOverView(dheight, dwidth),
           const SizedBox(height: 20),
           Divider(color: AppColor.grey[300], height: 0, thickness: 2),
-          yourRooms(context, bookingbloc),
           const SizedBox(height: 20),
+          personalDetails(),
+          Divider(color: AppColor.grey[300], height: 0, thickness: 2),
+          yourRooms(context, bookingbloc),
           PriceDetails(hotel),
           const SizedBox(height: 20),
           Divider(color: AppColor.grey[300], height: 0, thickness: 2),
           const SizedBox(height: 20),
-          const SubTitle('Payment Method', fontSize: 16),
-          const SizedBox(height: 20),
-          PaymentMethod(),
-          const SizedBox(height: 20),
-          const PrimaryButton(label: 'Book now', margin: 20),
+          button(),
           const SizedBox(height: 20),
         ],
+      ),
+    );
+  }
+
+  Widget button() {
+    return BlocConsumer<RoomBookingBloc, BookingState>(
+      listener: (context, state) {
+        if (state is BookingDateAvailableState) {
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => ScreenPayment(hotel: hotel)));
+        } else if (state is RoomSetedState) {
+          context.read<PaymentBloc>().add(
+                OpenPaymentEvent(
+                    mobileNumber: state.bookingData['phone'],
+                    propertyName: hotel.vendor.propertyName,
+                    total: int.parse(state.bookingData['total'])),
+              );
+        } else if (state is RoomBookingFailedState) {
+          MessageViewer.showSnackBar(context, 'Payment Canceld', true);
+        } else if (state is BookingDateNotAvailableState) {
+          MessageViewer.showSnackBar(
+              context, 'Booking date not available', true);
+        } else if (state is BookingFailedState) {
+          MessageViewer.showSnackBar(context, 'Booking failed', true);
+        } else if (state is RoomBookedSuccessState) {
+          Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => ScreenParant()),
+              (route) => false);
+        }
+      },
+      builder: (context, state) {
+        return BlocListener<PaymentBloc, PaymentState>(
+          listener: (context, state) {
+            if (state is PaymentSuccessState) {
+              context.read<RoomBookingBloc>().add(BookRoomEvent());
+            } else if (state is PaymentFailedState) {
+              MessageViewer.showSnackBar(context, 'Payment failed', true);
+            }
+          },
+          child: LoadingButton(
+            isLoading: state is BookingLoadingState,
+            label: 'Book now',
+            margin: 20,
+            onTap: () {
+              if (bookingFormKey.currentState!.validate()) {
+                context.read<RoomBookingBloc>().add(RoomEnquiryEvent(
+                      address: addressController.text,
+                      mobileNumber: mobileController.text,
+                      hotel: hotel,
+                      roomId: hotel.id,
+                    ));
+              }
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Padding personalDetails() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      child: Form(
+        key: bookingFormKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SubTitle('Personal Details', fontSize: 16, padding: 0),
+            const SizedBox(height: 20),
+            AppTextField(
+              label: 'Mobile Number',
+              controller: mobileController,
+              validator: (value) =>
+                  Validations.isNumber(value, 'mobile number'),
+            ),
+            const SizedBox(height: 15),
+            AppTextField(
+              label: 'Address',
+              minLine: 3,
+              controller: addressController,
+              validator: (value) => Validations.isEmpty(value, 'Address'),
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
       ),
     );
   }
@@ -99,7 +197,10 @@ class ScreenBooking extends StatelessWidget {
           Icons.arrow_back,
           color: Colors.black,
         ),
-        onPressed: () => Navigator.pop(context),
+        onPressed: () {
+          context.read<RoomBookingBloc>().add(ResetBookingEvent());
+          Navigator.pop(context);
+        },
       ),
       title: const Text('Booking Details'),
     );
@@ -142,18 +243,22 @@ class ScreenBooking extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           Divider(color: AppColor.grey[300], height: 0, thickness: 2),
-          const SizedBox(height: 20),
+          const SizedBox(height: 10),
         ],
       );
+
   getDates(BuildContext context, RoomBookingBloc bookingBloc) async {
+    final height = MediaQuery.sizeOf(context).height;
+    final width = MediaQuery.sizeOf(context).width;
     final selectedDates = await showCalendarDatePicker2Dialog(
       context: context,
       config: CalendarDatePicker2WithActionButtonsConfig(
-          calendarType: CalendarDatePicker2Type.range,
-          selectedRangeHighlightColor: AppColor.primaryColor.withOpacity(.2),
-          selectedDayHighlightColor: AppColor.primaryColor,
-          firstDate: DateTime.now()),
-      dialogSize: const Size(325, 400),
+        calendarType: CalendarDatePicker2Type.range,
+        selectedRangeHighlightColor: AppColor.primaryColor.withOpacity(.2),
+        selectedDayHighlightColor: AppColor.primaryColor,
+        firstDate: DateTime.now(),
+      ),
+      dialogSize: Size(height * .4, width * .7),
       value: [DateTime.now()],
       borderRadius: BorderRadius.circular(15),
     );
@@ -168,7 +273,7 @@ class ScreenBooking extends StatelessWidget {
     bookingBloc.add(SelectBookingDatesEvent(
         checkin: startDate.toIso8601String(),
         checkout: endDate.toIso8601String(),
-        numberOfDays: daysDifference));
+        numberOfDays: daysDifference + 1));
   }
 
   String getFormatedDates(DateTime date1, DateTime date2) {

@@ -8,7 +8,7 @@ class Vendor {
   String propertyLocation;
   String phone;
   bool isBanned;
-  String image;
+  String? image;
 
   Vendor({
     required this.id,

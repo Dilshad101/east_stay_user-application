@@ -10,19 +10,18 @@ part 'coupon_state.dart';
 class CouponBloc extends Bloc<CouponEvent, CouponState> {
   CouponBloc() : super(CouponInitial()) {
     on<FetchCouponsEvent>(_fetchCouponsEvent);
-    on<ClearCouponsEvent>(_clearCouponEvent);
     on<ApplyCouponEvent>(_applyCouponCode);
   }
   List<Coupon> _couponList = [];
 
   _fetchCouponsEvent(FetchCouponsEvent event, Emitter<CouponState> emit) async {
+    emit(CouponEmptyState());
     final either = await RoomRepo().getRoomCoupon(event.vendor.id);
 
     either.fold((error) {
       emit(CouponEmptyState());
     }, (response) {
       final rawList = response['coupon'] as List;
-
       if (rawList.isEmpty) return emit(CouponEmptyState());
 
       _couponList = rawList
@@ -31,12 +30,10 @@ class CouponBloc extends Bloc<CouponEvent, CouponState> {
       _couponList = _couponList
           .where((coupon) => coupon.endDate.isAfter(DateTime.now()))
           .toList();
-      emit(CouponLoadedSuccessfullState(couponList: _couponList));
+      _couponList.isEmpty
+          ? emit(CouponEmptyState())
+          : emit(CouponLoadedSuccessfullState(couponList: _couponList));
     });
-  }
-
-  _clearCouponEvent(ClearCouponsEvent event, Emitter<CouponState> emit) {
-    emit(CouponEmptyState());
   }
 
   _applyCouponCode(ApplyCouponEvent event, Emitter<CouponState> emit) async {
@@ -56,7 +53,8 @@ class CouponBloc extends Bloc<CouponEvent, CouponState> {
       emit(CouponAppliedFailedState(message: error.message));
     }, (response) {
       if (response['status'] == 'success') {
-        emit(CouponAppliedSuccessfullState());
+        emit(CouponAppliedSuccessfullState(
+            discount: response['coupon']['discount'].toString()));
       } else {
         emit(CouponAppliedFailedState(message: response['message']));
       }
