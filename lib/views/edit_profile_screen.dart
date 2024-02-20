@@ -2,7 +2,7 @@ import 'package:east_stay/blocs/user_bloc/user_bloc.dart';
 import 'package:east_stay/models/user_model.dart';
 import 'package:east_stay/resources/components/app_textfield.dart';
 import 'package:east_stay/resources/components/button.dart';
-import 'package:east_stay/resources/components/loding_button.dart';
+import 'package:east_stay/resources/components/loading_button.dart';
 import 'package:east_stay/resources/constants/text_style.dart';
 import 'package:east_stay/utils/snack_bar.dart';
 import 'package:east_stay/utils/validations.dart';

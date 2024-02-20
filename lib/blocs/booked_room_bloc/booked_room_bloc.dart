@@ -11,6 +11,7 @@ class BookedRoomBloc extends Bloc<BookedRoomEvent, BookedRoomState> {
     on<FetchBookedRoomsEvent>(_fetchBookedRoom);
     on<RateBookedRoomsEvent>(_rateBookedRoom);
     on<CancelBookedRoomsEvent>(_cancelRoom);
+    on<ResetBookedRoomsEvent>(_resetBookedRooms);
   }
 
   List<BookedRoom> bookedRooms = [];
@@ -93,6 +94,14 @@ class BookedRoomBloc extends Bloc<BookedRoomEvent, BookedRoomState> {
         );
       }
     });
+    emit(BookedRoomFetchedState(
+        bookedrooms: bookedRooms, upcomingBookings: upcomingBookings));
+  }
+
+  _resetBookedRooms(
+      ResetBookedRoomsEvent event, Emitter<BookedRoomState> emit) {
+    bookedRooms.clear();
+    upcomingBookings.clear();
     emit(BookedRoomFetchedState(
         bookedrooms: bookedRooms, upcomingBookings: upcomingBookings));
   }

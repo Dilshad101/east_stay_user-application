@@ -48,16 +48,10 @@ class ScreenSplash extends StatelessWidget {
 
   List<Widget> body(BuildContext context) {
     return [
-      SvgPicture.asset(
-        'assets/images/logo v2.svg',
-        colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
-      ),
+      SvgPicture.asset('assets/images/logo v2.svg'),
       SizedBox(
         height: MediaQuery.sizeOf(context).height * .10,
         width: MediaQuery.sizeOf(context).height * .10,
-      ),
-      CircularProgressIndicator(
-        color: Colors.grey[700],
       ),
     ];
   }

@@ -2,13 +2,14 @@ import 'package:east_stay/resources/constants/colors.dart';
 import 'package:flutter/material.dart';
 
 ThemeData lightTheme = ThemeData(
+  useMaterial3: false,
   fontFamily: 'Poppins',
   scaffoldBackgroundColor: AppColor.backgroundColor,
   appBarTheme: const AppBarTheme(
     iconTheme: IconThemeData(color: AppColor.secondaryColor),
     backgroundColor: AppColor.backgroundColor,
     centerTitle: true,
-    elevation: .5,
+    elevation: 0,
     titleTextStyle: TextStyle(
       fontSize: 18,
       color: AppColor.secondaryColor,

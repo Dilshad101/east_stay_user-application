@@ -1,18 +1,16 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:east_stay/blocs/booked_room_bloc/booked_room_bloc.dart';
 import 'package:east_stay/blocs/home_bloc/home_bloc.dart';
 import 'package:east_stay/blocs/login_bloc/login_bloc.dart';
 import 'package:east_stay/utils/snack_bar.dart';
+import 'package:east_stay/utils/validations.dart';
 import 'package:east_stay/views/parent_screen.dart';
 import 'package:east_stay/views/signup_screen.dart';
 import 'package:east_stay/resources/components/app_textfield.dart';
 import 'package:east_stay/resources/components/auth_header_container.dart';
-import 'package:east_stay/resources/components/loding_button.dart';
+import 'package:east_stay/resources/components/loading_button.dart';
 import 'package:east_stay/resources/components/pair_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class ScreenLogin extends StatelessWidget {
   ScreenLogin({super.key});
@@ -43,19 +41,19 @@ class ScreenLogin extends StatelessWidget {
                           label: 'Email address',
                           controller: emailController,
                           icon: Icons.person_outline,
-                          validator: (value) => value.toString().isEmpty
-                              ? 'Field is empty'
-                              : null,
+                          keyboard: TextInputType.emailAddress,
+                          validator: (value) =>
+                              Validations.isEmpty(value, 'email'),
                         ),
                         const SizedBox(height: 20),
                         AppTextField(
                           label: 'Password',
                           icon: Icons.lock_outline_rounded,
                           isObscured: true,
+                          keyboard: TextInputType.visiblePassword,
                           controller: passwordController,
-                          validator: (value) => value.toString().isEmpty
-                              ? 'Field is Empty'
-                              : null,
+                          validator: (value) =>
+                              Validations.isEmpty(value, 'password'),
                         ),
                         const SizedBox(height: 20),
                         PairText(
@@ -90,7 +88,7 @@ class ScreenLogin extends StatelessWidget {
                   bool isLoading = state is LoginLoadingState;
                   return LoadingButton(
                     label: 'Login',
-                    onTap: () => _requestPermissions(context),
+                    onTap: () => loginUser(context),
                     margin: 20,
                     isLoading: isLoading,
                   );
@@ -110,21 +108,6 @@ class ScreenLogin extends StatelessWidget {
             email: emailController.text,
             password: passwordController.text,
           ));
-    }
-  }
-  
-  Future<void> _requestPermissions(BuildContext context) async {
-    Map<Permission, PermissionStatus> statuses = await [
-      Permission.storage,
-    ].request();
-
-    if (statuses[Permission.storage] == PermissionStatus.granted) {
-      loginUser(context);
-    } else {
-      MessageViewer.showSnackBar(
-          context,
-          'To Continue, please enable the Storage permission in the app settings',
-          true);
     }
   }
 }

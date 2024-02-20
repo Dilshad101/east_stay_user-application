@@ -1,3 +1,4 @@
+import 'package:east_stay/blocs/booked_room_bloc/booked_room_bloc.dart';
 import 'package:east_stay/blocs/user_bloc/user_bloc.dart';
 import 'package:east_stay/data/shared_preferences/shared_pref.dart';
 import 'package:east_stay/resources/constants/colors.dart';
@@ -57,9 +58,11 @@ class ScreenSettings extends StatelessWidget {
                 alertPopup(
                   context: context,
                   title: 'Sign out',
+                  proceedText: 'Sign out',
                   content: 'Are you sure you want to sign out',
                   onCancel: () => Navigator.pop(context),
                   onOkey: () {
+                    context.read<BookedRoomBloc>().add(ResetBookedRoomsEvent());
                     SharedPref.instance.logOutUser();
                     Navigator.of(context).pushAndRemoveUntil(
                         MaterialPageRoute(builder: (context) => ScreenLogin()),
@@ -74,22 +77,30 @@ class ScreenSettings extends StatelessWidget {
     );
   }
 
-  ListTile settingsTile(IconData leading, String title,
+  Widget settingsTile(IconData leading, String title,
       {VoidCallback? onTap, bool hideSuffix = false}) {
-    return ListTile(
-      leading: Icon(leading, size: 23),
-      title: Text(
-        title,
-        style: AppText.largeDark,
-      ),
-      trailing: hideSuffix
-          ? null
-          : const Icon(
-              Icons.keyboard_arrow_right_outlined,
-              size: 24,
-              color: AppColor.secondaryColor,
-            ),
+    return GestureDetector(
       onTap: onTap,
+      child: SizedBox(
+        height: 60,
+        width: double.maxFinite,
+        child: Row(
+          children: [
+            const SizedBox(width: 20),
+            Icon(leading, size: 20, color: Colors.black),
+            const SizedBox(width: 15),
+            Expanded(child: Text(title, style: AppText.mediumdark)),
+            hideSuffix
+                ? const SizedBox()
+                : const Icon(
+                    Icons.keyboard_arrow_right_outlined,
+                    size: 24,
+                    color: AppColor.secondaryColor,
+                  ),
+            const SizedBox(width: 20),
+          ],
+        ),
+      ),
     );
   }
 

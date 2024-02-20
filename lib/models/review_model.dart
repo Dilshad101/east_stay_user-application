@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 class ReviewModel {
   String id;
   String roomId;
+  String userId;
   String reviewer;
   String vendorId;
   String feedback;
@@ -13,6 +14,7 @@ class ReviewModel {
   ReviewModel({
     required this.id,
     required this.roomId,
+    required this.userId,
     required this.reviewer,
     required this.vendorId,
     required this.feedback,
@@ -28,7 +30,8 @@ class ReviewModel {
     return ReviewModel(
       id: json['_id'],
       roomId: json['roomId'],
-      reviewer: json['userId']?['name']??'User',
+      userId: json['userId']['_id']??'userId',
+      reviewer: json['userId']?['name'] ?? 'User',
       vendorId: json['vendorId'],
       feedback: json['feedback'],
       stars: json['stars'],

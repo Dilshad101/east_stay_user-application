@@ -23,6 +23,7 @@ class Amenities extends StatelessWidget {
         children: amenities
             .map(
               (e) => Chip(
+                padding: const EdgeInsets.all(10),
                 backgroundColor: Colors.white,
                 label: Text(e, style: AppText.smallDark),
                 avatar: Icon(

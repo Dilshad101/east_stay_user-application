@@ -3,10 +3,10 @@ import 'package:card_swiper/card_swiper.dart';
 import 'package:east_stay/blocs/favorite_bloc/favorite_bloc.dart';
 import 'package:east_stay/blocs/review_bloc/review_bloc.dart';
 import 'package:east_stay/models/room_model.dart';
+import 'package:east_stay/resources/components/map_box.dart';
 import 'package:east_stay/resources/constants/colors.dart';
 import 'package:east_stay/resources/constants/text_style.dart';
 import 'package:east_stay/resources/loaders/shimmer.dart';
-import 'package:east_stay/utils/map_helper.dart';
 import 'package:east_stay/utils/snack_bar.dart';
 import 'package:east_stay/views/booking_screen.dart';
 import 'package:east_stay/resources/components/amenities.dart';
@@ -16,8 +16,6 @@ import 'package:east_stay/resources/components/room_price.dart';
 import 'package:east_stay/resources/components/subtitle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
 
 class ScreenRoomDetails extends StatelessWidget {
   const ScreenRoomDetails({super.key, required this.room});
@@ -46,13 +44,13 @@ class ScreenRoomDetails extends StatelessWidget {
               Coupons(vendor: room.vendor),
               const SubTitle('Location'),
               const SizedBox(height: 10),
-              map(dheight),
+              map(dheight, room),
               const SizedBox(height: 20),
               Reviews(room: room),
               const SizedBox(height: 20)
             ],
           ),
-          backButton(context)
+          // backButton(context)
         ],
       ),
       bottomNavigationBar: bottomButton(context),
@@ -108,65 +106,6 @@ class ScreenRoomDetails extends StatelessWidget {
     );
   }
 
-  Positioned backButton(BuildContext context) {
-    return Positioned(
-      top: MediaQuery.of(context).padding.top + 10,
-      left: 20,
-      child: CircleAvatar(
-        radius: 24,
-        backgroundColor: Colors.white,
-        child: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: const Icon(
-            Icons.arrow_back,
-            color: Colors.black,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Container map(double dheight) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      height: dheight * .25,
-      width: double.maxFinite,
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(4)),
-      child: AbsorbPointer(
-        absorbing: true,
-        child: FlutterMap(
-          options: MapOptions(
-            initialCenter: getLatLng(room.latitude.toString(), room.longitude),
-            initialZoom: 14,
-          ),
-          children: [
-            TileLayer(
-              urlTemplate: MapHelper.urlTemplate,
-              additionalOptions: const {
-                "accessToken": MapHelper.accessToken,
-                "id": MapHelper.mapId
-              },
-            ),
-            MarkerLayer(alignment: Alignment.center, markers: [
-              Marker(
-                height: 100,
-                width: 100,
-                point: getLatLng(room.latitude.toString(), room.longitude),
-                child: const Icon(
-                  Icons.location_on,
-                  color: Colors.red,
-                  size: 35,
-                ),
-              )
-            ])
-          ],
-        ),
-      ),
-    );
-  }
-
   Padding description() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -181,32 +120,44 @@ class ScreenRoomDetails extends StatelessWidget {
   Padding hotelName() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Expanded(
-            child: Text(
-              room.vendor.propertyName,
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: AppColor.secondaryColor,
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  room.vendor.propertyName,
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: AppColor.secondaryColor,
+                  ),
+                ),
               ),
-            ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: AppColor.color(room.category),
+                ),
+                child: Text(
+                  room.category,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 1,
+                  ),
+                ),
+              )
+            ],
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(6),
-              color: AppColor.gold,
-            ),
-            child: Text(
-              room.category,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 1,
-              ),
-            ),
+          Text(
+            '${room.state} ${room.city}',
+            style: AppText.mediumdark,
           )
         ],
       ),
@@ -237,56 +188,71 @@ class ScreenRoomDetails extends StatelessWidget {
                   space: 4),
             ),
           ),
-          favButton(context)
+          buttons(context)
         ],
       ),
     );
   }
 
-  Widget favButton(BuildContext context) {
+  Widget buttons(BuildContext context) {
     return Positioned(
-        top: MediaQuery.of(context).padding.top + 10,
-        right: 20,
-        child: BlocConsumer<FavoriteBloc, FavoriteState>(
-          buildWhen: (previous, current) => current is! FavoriteActionState,
-          listenWhen: (previous, current) => current is FavoriteActionState,
-          listener: (context, state) {
-            if (state is WishListFailedState) {
-              MessageViewer.showSnackBar(context, state.message);
-            }
-          },
-          builder: (context, state) {
-            if (state is WishListFetchedState) {
-              final isFavorite = state.wishListedRooms
-                  .where((favRoom) => favRoom.id == room.id)
-                  .firstOrNull;
-
-              return CircleAvatar(
-                radius: 22,
-                backgroundColor: Colors.white,
-                child: IconButton(
-                  onPressed: () {
-                    context.read<FavoriteBloc>().add(
-                          isFavorite == null
-                              ? AddToWishListEvent(room: room)
-                              : RemoveFromWishListEvent(room: room),
-                        );
-                  },
-                  icon: Icon(
-                    isFavorite != null ? Icons.favorite : Icons.favorite_border,
-                    color: AppColor.primaryColor,
+      left: 20,
+      right: 20,
+      top: MediaQuery.of(context).padding.top + 10,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          CircleAvatar(
+            radius: 24,
+            backgroundColor: Colors.white.withOpacity(.4),
+            child: IconButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              icon: const Icon(
+                Icons.arrow_back,
+                color: Colors.black,
+              ),
+            ),
+          ),
+          BlocConsumer<FavoriteBloc, FavoriteState>(
+            buildWhen: (previous, current) => current is! FavoriteActionState,
+            listenWhen: (previous, current) => current is FavoriteActionState,
+            listener: (context, state) {
+              if (state is WishListFailedState) {
+                MessageViewer.showSnackBar(context, state.message);
+              }
+            },
+            builder: (context, state) {
+              if (state is WishListFetchedState) {
+                final isFavorite = state.wishListedRooms
+                    .where((favRoom) => favRoom.id == room.id)
+                    .firstOrNull;
+                return CircleAvatar(
+                  radius: 22,
+                  backgroundColor: Colors.white.withOpacity(.4),
+                  child: IconButton(
+                    onPressed: () {
+                      context.read<FavoriteBloc>().add(
+                            isFavorite == null
+                                ? AddToWishListEvent(room: room)
+                                : RemoveFromWishListEvent(room: room),
+                          );
+                    },
+                    icon: Icon(
+                      isFavorite != null
+                          ? Icons.favorite
+                          : Icons.favorite_border,
+                      color: const Color(0xffFF0000),
+                    ),
                   ),
-                ),
-              );
-            }
-            return const SizedBox();
-          },
-        ));
-  }
-
-  LatLng getLatLng(String lat, String lng) {
-    final latitude = double.parse(lat);
-    final longitude = double.parse(lng);
-    return LatLng(latitude, longitude);
+                );
+              }
+              return const SizedBox();
+            },
+          )
+        ],
+      ),
+    );
   }
 }

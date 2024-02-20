@@ -30,12 +30,12 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
   }
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
-    print('payment success');
+   
     add(PaymentSuccessEvent());
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
-    print('payment failed');
+   
     add(PaymentFailedEvent());
   }
 

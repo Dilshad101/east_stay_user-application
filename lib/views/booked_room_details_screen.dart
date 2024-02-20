@@ -1,7 +1,10 @@
 import 'package:east_stay/blocs/booked_room_bloc/booked_room_bloc.dart';
 import 'package:east_stay/models/booked_room_model.dart';
+import 'package:east_stay/resources/components/box_tile.dart';
+import 'package:east_stay/resources/components/reviews.dart';
 import 'package:east_stay/resources/constants/colors.dart';
 import 'package:east_stay/resources/constants/text_style.dart';
+import 'package:east_stay/utils/services.dart';
 import 'package:east_stay/utils/snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,19 +18,35 @@ class ScreenBookedRoomDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(title: const Text('your Bookings')),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         children: [
           Container(
             height: 180,
             decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(6),
-                color: Colors.grey,
-                image: DecorationImage(
-                  image: NetworkImage(bookedRoom.room.img[0]),
-                  fit: BoxFit.cover,
-                )),
+              borderRadius: BorderRadius.circular(6),
+              color: Colors.grey[200],
+              image: DecorationImage(
+                image: NetworkImage(bookedRoom.room.img[0]),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(50),
+                  color: AppColor.color(bookedRoom.room.category),
+                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                child: Text('Classic',
+                    style: AppText.smallLight.copyWith(color: Colors.white)),
+              ),
+            ],
           ),
           const SizedBox(height: 15),
           Text(bookedRoom.vendor.propertyName, style: AppText.xLarge),
@@ -42,97 +61,113 @@ class ScreenBookedRoomDetails extends StatelessWidget {
             width: double.maxFinite,
             child: Row(
               children: [
-                dateField('Check In', formatDate(bookedRoom.checkIn), true),
+                BoxTile(
+                    type: BoxType.multiLine,
+                    title: 'Check In',
+                    value: formatDate(bookedRoom.checkIn)),
                 const SizedBox(width: 8),
-                dateField('Check Out', formatDate(bookedRoom.checkOut)),
+                BoxTile(
+                    type: BoxType.multiLine,
+                    title: 'Check Out',
+                    value: formatDate(bookedRoom.checkOut)),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 70,
+            width: double.maxFinite,
+            child: Row(
+              children: [
+                BoxTile(
+                    type: BoxType.multiLine,
+                    title: 'Total Days',
+                    value: bookedRoom.days.toString()),
+                const SizedBox(width: 8),
+                BoxTile(
+                    type: BoxType.multiLine,
+                    title: 'Rent',
+                    value: bookedRoom.roomPrice.toString()),
               ],
             ),
           ),
           const SizedBox(height: 15),
-          keyValue('Room Type', bookedRoom.type, true),
+          BoxTile(
+            type: BoxType.singleLine,
+            title: 'Booking ID',
+            value: bookedRoom.id,
+          ),
+          const SizedBox(height: 8),
+          BoxTile(
+            title: 'Total Price',
+            value: '₹ ${bookedRoom.total}',
+            type: BoxType.singleLine,
+            price: true,
+          ),
+          const SizedBox(height: 10),
+          callButton(),
           const SizedBox(height: 15),
-          keyValue('Total Price', '₹ ${bookedRoom.total}', false),
-          const SizedBox(height: 15),
-          keyValue('Booking ID', bookedRoom.id, false),
-          const SizedBox(height: 30),
-          showCancel ? button(context) : const SizedBox(),
+          showCancel
+              ? button(context)
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Your review", style: AppText.mediumdark),
+                    Reviews(
+                      room: bookedRoom.room,
+                      singleUser: true,
+                    ),
+                  ],
+                ),
           const SizedBox(height: 15),
         ],
+      ),
+    );
+  }
+
+  GestureDetector callButton() {
+    return GestureDetector(
+      onTap: () => AppService.launchPhone(bookedRoom.vendor.phone),
+      child: Container(
+        height: 48,
+        alignment: Alignment.center,
+        width: double.maxFinite,
+        decoration: BoxDecoration(
+          color: Colors.blue[800],
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          'Call Hotel Manager',
+          style: AppText.mediumLight,
+        ),
       ),
     );
   }
 
   Widget button(BuildContext context) {
     return BlocListener<BookedRoomBloc, BookedRoomState>(
-        listenWhen: (previous, current) => current is BookedRoomActionState,
-        listener: (context, state) {
-          if (state is RoomCancelSuccessState) {
-            MessageViewer.showSnackBar(context, 'Room has been canceled');
-          } else if (state is RoomCancelFailedState) {
-            MessageViewer.showSnackBar(context, state.message);
-          }
-        },
-        child: OutlinedButton(
-          style: ButtonStyle(
-            side:
-                MaterialStateProperty.all(const BorderSide(color: Colors.red)),
-            fixedSize: MaterialStateProperty.all(const Size.fromHeight(52)),
-          ),
-          onPressed: () => context
-              .read<BookedRoomBloc>()
-              .add(CancelBookedRoomsEvent(bookId: bookedRoom.id)),
-          child: const Text(
-            'Cancel',
-            style: TextStyle(color: Colors.red),
-          ),
-        ));
-  }
-
-  Row keyValue(String key, String value, bool inBox, {Color? color}) {
-    return Row(
-      children: [
-        Text(key, style: AppText.mediumdark),
-        const Spacer(),
-        inBox
-            ? Container(
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(6),
-                    color: Colors.grey[700]),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-                child: Text(value,
-                    style: AppText.smallLight.copyWith(color: Colors.white)),
-              )
-            : Text(value,
-                style: AppText.smallLight.copyWith(
-                    color: color ?? AppColor.secondaryColor,
-                    fontFamily: 'Ubuntu')),
-      ],
-    );
-  }
-
-  Expanded dateField(String title, String subtitle, [bool isCheckIn = false]) {
-    return Expanded(
-        child: Container(
-      decoration: BoxDecoration(
-          color: Colors.white, borderRadius: BorderRadius.circular(6)),
-      padding: isCheckIn
-          ? const EdgeInsets.only(left: 20, top: 10)
-          : const EdgeInsets.only(right: 20, top: 10),
-      child: Column(
-        crossAxisAlignment:
-            isCheckIn ? CrossAxisAlignment.start : CrossAxisAlignment.end,
-        // mainAxisAlignment: MainAxisAlignment.s,
-        children: [
-          Text(title,
-              style: AppText.mediumLight
-                  .copyWith(fontSize: 13, color: Colors.grey)),
-          const SizedBox(height: 6),
-          Text(subtitle,
-              style: AppText.mediumLight.copyWith(color: Colors.black))
-        ],
+      listenWhen: (previous, current) => current is BookedRoomActionState,
+      listener: (context, state) {
+        if (state is RoomCancelSuccessState) {
+          MessageViewer.showSnackBar(context, 'Room has been canceled');
+        } else if (state is RoomCancelFailedState) {
+          MessageViewer.showSnackBar(context, state.message);
+        }
+      },
+      child: OutlinedButton(
+        style: ButtonStyle(
+          side: MaterialStateProperty.all(const BorderSide(color: Colors.red)),
+          fixedSize: MaterialStateProperty.all(const Size.fromHeight(52)),
+        ),
+        onPressed: () => context
+            .read<BookedRoomBloc>()
+            .add(CancelBookedRoomsEvent(bookId: bookedRoom.id)),
+        child: const Text(
+          'Cancel',
+          style: TextStyle(color: Colors.red),
+        ),
       ),
-    ));
+    );
   }
 
   String formatDate(DateTime date) {

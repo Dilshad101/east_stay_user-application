@@ -4,7 +4,7 @@ import 'package:east_stay/blocs/bookin_bloc/booking_bloc.dart';
 import 'package:east_stay/blocs/payment_bloc/payment_bloc.dart';
 import 'package:east_stay/models/room_model.dart';
 import 'package:east_stay/resources/components/app_textfield.dart';
-import 'package:east_stay/resources/components/loding_button.dart';
+import 'package:east_stay/resources/components/loading_button.dart';
 import 'package:east_stay/resources/constants/colors.dart';
 import 'package:east_stay/resources/constants/text_style.dart';
 import 'package:east_stay/resources/components/booking_count_field.dart';
@@ -15,7 +15,6 @@ import 'package:east_stay/resources/loaders/shimmer.dart';
 import 'package:east_stay/utils/snack_bar.dart';
 import 'package:east_stay/utils/validations.dart';
 import 'package:east_stay/views/parent_screen.dart';
-import 'package:east_stay/views/payment_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -67,10 +66,7 @@ class ScreenBooking extends StatelessWidget {
   Widget button() {
     return BlocConsumer<RoomBookingBloc, BookingState>(
       listener: (context, state) {
-        if (state is BookingDateAvailableState) {
-          Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => ScreenPayment(hotel: hotel)));
-        } else if (state is RoomSetedState) {
+        if (state is RoomAvailableState) {
           context.read<PaymentBloc>().add(
                 OpenPaymentEvent(
                     mobileNumber: state.bookingData['phone'],
@@ -88,6 +84,7 @@ class ScreenBooking extends StatelessWidget {
           Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(builder: (context) => ScreenParant()),
               (route) => false);
+          MessageViewer.showSnackBar(context, 'Room booked successfully');
         }
       },
       builder: (context, state) {
@@ -270,10 +267,13 @@ class ScreenBooking extends StatelessWidget {
     final endDate = DateTime(lastDate.year, lastDate.month, lastDate.day);
     Duration difference = endDate.difference(startDate);
     int daysDifference = difference.inDays;
-    bookingBloc.add(SelectBookingDatesEvent(
+    bookingBloc.add(
+      SelectBookingDatesEvent(
         checkin: startDate.toIso8601String(),
         checkout: endDate.toIso8601String(),
-        numberOfDays: daysDifference + 1));
+        numberOfDays: daysDifference + 1,
+      ),
+    );
   }
 
   String getFormatedDates(DateTime date1, DateTime date2) {

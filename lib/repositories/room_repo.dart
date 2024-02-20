@@ -20,8 +20,8 @@ class RoomRepo {
   EitherResponse rateARoom(var review) async =>
       await ApiServices.postApi(review, AppUrls.rateARoom);
 
-  EitherResponse getRoomReview(String roomId) async => await ApiServices.getApi(
-      AppUrls.getRoomReview.replaceFirst('roomId', roomId), token);
+  EitherResponse getRoomReview(String roomId) async =>
+      await ApiServices.getApi(AppUrls.getRoomReview + roomId, token);
 
   EitherResponse getTopRatedRooms() async =>
       await ApiServices.getApi(AppUrls.getTopRatedRooms);
@@ -37,5 +37,4 @@ class RoomRepo {
 
   EitherResponse getAvailableDates(String roomId) async =>
       await ApiServices.getApi(AppUrls.getAvailableDates + roomId, token);
-
 }

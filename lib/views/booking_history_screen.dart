@@ -14,7 +14,7 @@ class ScreenBookingHistory extends StatelessWidget {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Your Bookings'),
+          title: const Text('your Bookings'),
           bottom: tabBar(),
         ),
         body: TabBarView(

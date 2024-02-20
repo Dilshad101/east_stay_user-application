@@ -11,8 +11,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class Reviews extends StatelessWidget {
-  const Reviews({super.key, required this.room});
+  const Reviews({super.key, required this.room, this.singleUser = false});
   final Hotel room;
+  final bool singleUser;
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ReviewBloc, ReviewState>(
@@ -20,7 +21,9 @@ class Reviews extends StatelessWidget {
         if (state is ReviewFetchedSuccessState) {
           return Column(
             children: [
-              _reviewTitle(state.reviews, context),
+              singleUser
+                  ? const SizedBox()
+                  : _reviewTitle(state.reviews, context),
               _reviewList(state.reviews)
             ],
           );
@@ -30,20 +33,31 @@ class Reviews extends StatelessWidget {
                 color: AppColor.primaryColor, size: 20),
           );
         } else if (state is ReviewEmptyState) {
-          return Column(
-            children: [
-              _reviewTitle(null, context),
-              SizedBox(
-                height: 100,
-                child: Center(
-                  child: Text(
-                    "No reviews are available for this room.",
-                    style: AppText.mediumLight.copyWith(color: Colors.grey),
+          return singleUser
+              ? SizedBox(
+                  height: 100,
+                  child: Center(
+                    child: Text(
+                      "You haven't added any reviews",
+                      style: AppText.mediumLight.copyWith(color: Colors.grey),
+                    ),
                   ),
-                ),
-              )
-            ],
-          );
+                )
+              : Column(
+                  children: [
+                    _reviewTitle(null, context),
+                    SizedBox(
+                      height: 100,
+                      child: Center(
+                        child: Text(
+                          "No reviews are available for this room.",
+                          style:
+                              AppText.mediumLight.copyWith(color: Colors.grey),
+                        ),
+                      ),
+                    )
+                  ],
+                );
         }
         return const SizedBox();
       },

@@ -106,7 +106,7 @@ class RoomBookingBloc extends Bloc<BookingEvent, BookingState> {
       'vendorId': event.hotel.vendor.id,
     };
 
-    emit(RoomSetedState(bookingData: bookingData));
+    emit(RoomAvailableState(bookingData: bookingData));
   }
 
   _resetBookings(ResetBookingEvent event, Emitter<BookingState> emit) {

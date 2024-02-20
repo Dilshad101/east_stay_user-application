@@ -7,3 +7,9 @@ class FetchReviewEvent extends ReviewEvent {
 
   FetchReviewEvent(this.roomId);
 }
+
+class FetchUserReviewEvent extends ReviewEvent {
+  final String roomId;
+
+  FetchUserReviewEvent({required this.roomId});
+}

@@ -2,12 +2,14 @@
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:east_stay/blocs/booked_room_bloc/booked_room_bloc.dart';
+import 'package:east_stay/blocs/review_bloc/review_bloc.dart';
 import 'package:east_stay/models/booked_room_model.dart';
 import 'package:east_stay/resources/constants/colors.dart';
 import 'package:east_stay/resources/constants/text_style.dart';
 import 'package:east_stay/resources/components/button.dart';
 import 'package:east_stay/resources/components/star_rater.dart';
 import 'package:east_stay/resources/loaders/shimmer.dart';
+import 'package:east_stay/utils/alert_dialoge.dart';
 import 'package:east_stay/utils/snack_bar.dart';
 import 'package:east_stay/views/booked_room_details_screen.dart';
 import 'package:east_stay/views/room_details_screen.dart';
@@ -27,78 +29,86 @@ class BookingDetailsTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dwidth = MediaQuery.sizeOf(context).width;
-    return GestureDetector(
-      onTap: () => Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => ScreenBookedRoomDetails(
-                bookedRoom: bookedRoom,
-                showCancel: showCancel,
-              ))),
-      child: Container(
-        height: 155,
-        padding: const EdgeInsets.only(top: 10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(6),
-          color: Colors.white,
-        ),
-        child: Column(
-          children: [
-            body(dwidth),
-            const SizedBox(height: 10),
-            showCancel ? cancelroom(context) : rateUs(context, dwidth)
-          ],
-        ),
+    return Container(
+      height: 155,
+      padding: const EdgeInsets.only(top: 10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(6),
+        color: Colors.white,
+      ),
+      child: Column(
+        children: [
+          body(dwidth, context),
+          const SizedBox(height: 10),
+          showCancel ? cancelroom(context) : rateUs(context, dwidth)
+        ],
       ),
     );
   }
 
-  Widget body(double dwidth) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          height: 90,
-          width: dwidth * .35,
-          margin: const EdgeInsets.only(left: 10),
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(6)),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: CachedNetworkImage(
-              imageUrl: bookedRoom.room.img[0],
-              placeholder: (context, url) => const ShimmerLoader(
-                  height: double.maxFinite, width: double.maxFinite),
-              errorWidget: (context, url, error) => const Icon(Icons.error),
-              fit: BoxFit.cover,
+  Widget body(double dwidth, BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        context
+            .read<ReviewBloc>()
+            .add(FetchUserReviewEvent(roomId: bookedRoom.room.id));
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => ScreenBookedRoomDetails(
+              bookedRoom: bookedRoom,
+              showCancel: showCancel,
             ),
           ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                bookedRoom.vendor.propertyName,
-                style: AppText.largeDark,
-                overflow: TextOverflow.ellipsis,
+        );
+      },
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            height: 90,
+            width: dwidth * .35,
+            margin: const EdgeInsets.only(left: 10),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(6)),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: CachedNetworkImage(
+                imageUrl: bookedRoom.room.img[0],
+                placeholder: (context, url) => const ShimmerLoader(
+                    height: double.maxFinite, width: double.maxFinite),
+                errorWidget: (context, url, error) => const Icon(Icons.error),
+                fit: BoxFit.cover,
               ),
-              Text(
-                '${bookedRoom.room.city} ${bookedRoom.room.state}',
-                style: AppText.xSmall,
-                overflow: TextOverflow.ellipsis,
-              ),
-              Text(
-                'Check In : ${formatDate(bookedRoom.checkIn)}',
-                style: AppText.xSmall,
-              ),
-              Text(
-                'Check Out : ${formatDate(bookedRoom.checkOut)}',
-                style: AppText.xSmall,
-              ),
-            ],
+            ),
           ),
-        )
-      ],
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  bookedRoom.vendor.propertyName,
+                  style: AppText.largeDark,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  '${bookedRoom.room.city} ${bookedRoom.room.state}',
+                  style: AppText.xSmall,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  'Check In : ${formatDate(bookedRoom.checkIn)}',
+                  style: AppText.xSmall,
+                ),
+                Text(
+                  'Check Out : ${formatDate(bookedRoom.checkOut)}',
+                  style: AppText.xSmall,
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
     );
   }
 
@@ -157,44 +167,55 @@ class BookingDetailsTile extends StatelessWidget {
 
   Expanded cancelroom(BuildContext context) {
     return Expanded(
-      child: Column(
-        children: [
-          Divider(
-            color: AppColor.grey[400],
-            height: 0,
-          ),
-          Expanded(
-            child: BlocListener<BookedRoomBloc, BookedRoomState>(
-              listenWhen: (previous, current) =>
-                  current is BookedRoomActionState,
-              listener: (context, state) {
-                if (state is RoomCancelSuccessState) {
-                  MessageViewer.showSnackBar(context, 'Room has been canceled');
-                } else if (state is RoomCancelFailedState) {
-                  MessageViewer.showSnackBar(context, state.message);
-                }
-              },
-              child: GestureDetector(
-                onTap: () {
-                  context
-                      .read<BookedRoomBloc>()
-                      .add(CancelBookedRoomsEvent(bookId: bookedRoom.id));
-                },
-                child: Container(
-                  alignment: Alignment.center,
-                  child: const Text(
-                    'Cancel Room',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.red,
-                      fontWeight: FontWeight.w600,
+      child: GestureDetector(
+        onTap: () => alertPopup(
+          context: context,
+          proceedText: 'Ok',
+          title: 'Cancel Room',
+          content: 'Are you sure you want to Cancel this Room?',
+          onCancel: () => Navigator.pop(context),
+          onOkey: () {
+            context
+                .read<BookedRoomBloc>()
+                .add(CancelBookedRoomsEvent(bookId: bookedRoom.id));
+          },
+        ),
+        child: Container(
+          color: Colors.white,
+          child: Column(
+            children: [
+              Divider(
+                color: AppColor.grey[400],
+                height: 0,
+              ),
+              Expanded(
+                child: BlocListener<BookedRoomBloc, BookedRoomState>(
+                  listenWhen: (previous, current) =>
+                      current is BookedRoomActionState,
+                  listener: (context, state) {
+                    if (state is RoomCancelSuccessState) {
+                      MessageViewer.showSnackBar(
+                          context, 'Room has been canceled');
+                    } else if (state is RoomCancelFailedState) {
+                      MessageViewer.showSnackBar(context, state.message);
+                    }
+                  },
+                  child: Container(
+                    alignment: Alignment.center,
+                    child: const Text(
+                      'Cancel Room',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.red,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ),
-          )
-        ],
+              )
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -252,7 +273,7 @@ class BookingDetailsTile extends StatelessWidget {
                     context.read<BookedRoomBloc>().add(RateBookedRoomsEvent(
                           feedback: reviewController.text.trim(),
                           stars: rate.toString(),
-                          roomId: bookedRoom.id,
+                          roomId: bookedRoom.room.id,
                           vendorId: bookedRoom.vendor.id,
                         )),
               ),

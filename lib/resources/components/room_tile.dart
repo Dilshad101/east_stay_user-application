@@ -35,7 +35,9 @@ class RoomTile extends StatelessWidget {
                   imageUrl: room.img[0],
                   placeholder: (context, url) => const ShimmerLoader(
                       height: double.maxFinite, width: double.maxFinite),
-                  errorWidget: (context, url, error) => const Icon(Icons.error),
+                  errorWidget: (context, url, error) {
+                    return const Center(child: Icon(Icons.error,color: Colors.grey));
+                  },
                   fit: BoxFit.cover,
                 ),
               ),

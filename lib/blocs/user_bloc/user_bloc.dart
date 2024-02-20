@@ -28,9 +28,10 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     });
   }
 
-  _fetchToken(FetchUserTokenEvent event, Emitter<UserState> emit) {
+  _fetchToken(FetchUserTokenEvent event, Emitter<UserState> emit) async {
     final token = SharedPref.instance.getUser();
     if (token == null) {
+      await Future.delayed(const Duration(seconds: 1));
       emit(UserTokenNotFoundState());
     } else {
       emit(UserTokenFetchedState(token: token));

@@ -4,7 +4,7 @@ abstract class BookingState {}
 
 abstract class BookingActionState extends BookingState {}
 
-class PaymentSuccesState extends BookingActionState {}
+// class PaymentSuccesState extends BookingActionState {}
 
 final class BookingInitial extends BookingState {}
 
@@ -18,7 +18,7 @@ final class BookingFieldFilledState extends BookingActionState {
   BookingFieldFilledState({required this.bookingData});
 }
 
-final class BookingDateAvailableState extends BookingState {}
+// final class BookingDateAvailableState extends BookingState {}
 
 final class BookingDateNotAvailableState extends BookingState {}
 
@@ -30,8 +30,8 @@ final class BookingFailedState extends BookingState {
   BookingFailedState({required this.message});
 }
 
-final class RoomSetedState extends BookingState {
+final class RoomAvailableState extends BookingState {
   final Map<String, dynamic> bookingData;
 
-  RoomSetedState({required this.bookingData});
+  RoomAvailableState({required this.bookingData});
 }

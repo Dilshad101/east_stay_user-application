@@ -36,6 +36,7 @@ class AppSearchBar extends StatelessWidget {
       child: Hero(
         tag: 'search',
         child: Material(
+          color: AppColor.backgroundColor,
           child: Row(
             children: [
               Expanded(
@@ -44,7 +45,7 @@ class AppSearchBar extends StatelessWidget {
                         borderRadius: 6,
                         isReadOnly: true,
                         fillColor: Colors.white,
-                        hint: 'Search hotel , appartment...',
+                        hint: 'Search city, state...',
                         suffixIcon: Icons.search,
                         onTap: () => Navigator.of(context).push(
                           MaterialPageRoute(
@@ -53,7 +54,7 @@ class AppSearchBar extends StatelessWidget {
                       )
                     : AppTextField(
                         controller: searchController,
-                        hint: 'Search hotel, appartment...',
+                        hint: 'Search city, state...',
                         onChanged: (val) {
                           List<String> filters = [];
                           filterNotifier!.value.forEach((key, value) {

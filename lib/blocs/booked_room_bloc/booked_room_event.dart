@@ -23,4 +23,5 @@ class CancelBookedRoomsEvent extends BookedRoomEvent {
 
   CancelBookedRoomsEvent({required this.bookId});
 }
-// roomId, feedback, stars, vendorId -(body)   pass token usertoken
+
+class ResetBookedRoomsEvent extends BookedRoomEvent {}

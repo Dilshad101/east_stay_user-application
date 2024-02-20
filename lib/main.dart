@@ -13,6 +13,7 @@ import 'package:east_stay/data/shared_preferences/shared_pref.dart';
 import 'package:east_stay/utils/light_theme.dart';
 import 'package:east_stay/views/splash_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() async {
@@ -26,6 +27,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => UserBloc()),
@@ -39,11 +43,9 @@ class MyApp extends StatelessWidget {
         BlocProvider(
             create: (context) => HomeBloc(context.read<FavoriteBloc>())),
         BlocProvider(
-          create: (context) => RoomBookingBloc(context.read<BookedRoomBloc>()),
-        ),
-        BlocProvider(
-          create: (context) => SearchBloc(context.read<HomeBloc>()),
-        ),
+            create: (context) =>
+                RoomBookingBloc(context.read<BookedRoomBloc>())),
+        BlocProvider(create: (context) => SearchBloc(context.read<HomeBloc>())),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
